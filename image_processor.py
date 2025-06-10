@@ -48,7 +48,7 @@ except Exception as e:
     print("Note: OCR functionality will be limited without Tesseract installed")
     tesseract_available = False
 
-def preprocess_image(image_path):
+def preprocess_image(image_path, format_type='auto'):
     """Preprocess an image to improve OCR results"""
     try:
         # Read the image
@@ -57,40 +57,107 @@ def preprocess_image(image_path):
             logger.error(f"Failed to load image from {image_path}")
             return None
         
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Convert to RGB first for PIL compatibility
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        pil_img = Image.fromarray(img_rgb)
         
-        # Apply thresholding to get a binary image
-        _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+        # Detect format type if auto
+        if format_type == 'auto':
+            # Use PIL to extract text for format detection
+            sample_text = pytesseract.image_to_string(pil_img)
+            if 'labor collection' in sample_text.lower() or 'order number' in sample_text.lower() and 'labor type' in sample_text.lower():
+                format_type = 'table'
+            else:
+                format_type = 'mobile'
         
-        # Noise removal
-        kernel = np.ones((1, 1), np.uint8)
-        binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+        # Table format preprocessing (for labor collection reports)
+        if format_type == 'table':
+            # Convert to grayscale
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Increase contrast for table text
+            clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+            gray = clahe.apply(gray)
+            
+            # Apply adaptive thresholding for better table line detection
+            binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+            
+            # Morphological operations to clean up table structure
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 1))
+            binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+            
+            # Denoise
+            binary = cv2.medianBlur(binary, 3)
+            
+            return binary
         
-        # Invert the image
-        binary = 255 - binary
-        
-        return binary
+        # Mobile format preprocessing (original method)
+        else:
+            # Convert to grayscale
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Apply thresholding to get a binary image
+            _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+            
+            # Noise removal
+            kernel = np.ones((1, 1), np.uint8)
+            binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+            
+            # Invert the image
+            binary = 255 - binary
+            
+            return binary
+            
     except Exception as e:
         logger.error(f"Error preprocessing image: {str(e)}")
         return None
 
-def extract_text_from_image(image_path):
+def extract_text_from_image(image_path, format_type='auto'):
     """Extract all text from an image using OCR"""
     try:
-        # Load the image with PIL for simplest approach
+        # Load the image with PIL
         img = Image.open(image_path)
         
-        # Perform OCR directly - simpler and often more reliable than preprocessing
-        text = pytesseract.image_to_string(img)
+        # Auto-detect format if needed
+        if format_type == 'auto':
+            sample_text = pytesseract.image_to_string(img)
+            if 'labor collection' in sample_text.lower() or ('order number' in sample_text.lower() and 'labor type' in sample_text.lower()):
+                format_type = 'table'
+            else:
+                format_type = 'mobile'
+        
+        # Use different OCR configurations based on format
+        if format_type == 'table':
+            # Table format: Use PSM 6 (single block) with table-specific preprocessing
+            preprocessed = preprocess_image(image_path, 'table')
+            if preprocessed is not None:
+                pil_preprocessed = Image.fromarray(preprocessed)
+                custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:/-() .'
+                text = pytesseract.image_to_string(pil_preprocessed, config=custom_config)
+            else:
+                # Fallback to original image
+                custom_config = r'--oem 3 --psm 6'
+                text = pytesseract.image_to_string(img, config=custom_config)
+        
+        elif format_type == 'mobile':
+            # Mobile format: Use PSM 6 (single block) for mobile app screens
+            custom_config = r'--oem 3 --psm 6'
+            text = pytesseract.image_to_string(img, config=custom_config)
+        
+        else:
+            # Default: Use automatic page segmentation
+            text = pytesseract.image_to_string(img)
         
         # Save the raw OCR text for debugging
-        debug_file = os.path.dirname(image_path) + "/debug_ocr.txt"
+        debug_file = os.path.dirname(image_path) + f"/debug_ocr_{format_type}.txt"
         with open(debug_file, 'w', encoding='utf-8') as f:
+            f.write(f"Format: {format_type}\n")
+            f.write(f"Text Length: {len(text)} characters\n")
+            f.write("="*50 + "\n")
             f.write(text)
             
-        logger.info(f"Extracted text from image: {len(text)} characters. Saved to {debug_file}")
-        print(f"\nExtracted {len(text)} characters from image. Saved raw OCR to {debug_file}\n")
+        logger.info(f"Extracted text from image ({format_type} format): {len(text)} characters. Saved to {debug_file}")
+        print(f"\nExtracted {len(text)} characters from image ({format_type} format). Saved raw OCR to {debug_file}\n")
         return text
     except Exception as e:
         logger.error(f"Error extracting text from image: {str(e)}")
@@ -400,7 +467,14 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
         
         # Extract text from image
         if tesseract_available:
-            text = extract_text_from_image(image_path)
+            # Auto-detect format based on format_type parameter
+            ocr_format = 'auto'
+            if format_type == 'labor_collection':
+                ocr_format = 'table'
+            elif format_type == 'punch_clocks' or format_type == 'standard':
+                ocr_format = 'mobile'
+            
+            text = extract_text_from_image(image_path, ocr_format)
             print(f"Extracted text length: {len(text) if text else 0} characters")
             
             if not text:

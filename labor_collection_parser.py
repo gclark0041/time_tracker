@@ -17,8 +17,12 @@ def extract_labor_collection_entries(text):
     if not text:
         return []
     
-    # Print the first 100 characters of the text for debugging
-    print(f"OCR TEXT SAMPLE: {text[:100]}...")
+    # Print the full text for debugging
+    print("="*80)
+    print("FULL LABOR COLLECTION OCR TEXT:")
+    print("="*80)
+    print(text)
+    print("="*80)
         
     entries = []
     lines = text.split('\n')
@@ -78,13 +82,26 @@ def extract_labor_collection_entries(text):
         # Print the line for debugging
         print(f"Processing line {i}: {line[:50]}{'...' if len(line) > 50 else ''}")
         
-        # Multiple patterns for labor collection entries with variations for OCR errors
+        # Enhanced patterns for labor collection entries with variations for OCR errors
         # Order Number, Labor Type, Start Time, End Time, Hours
         entry_patterns = [
+            # Standard format with exact spacing
             r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
+            
+            # Flexible spacing and punctuation
             r'(S[O0][\dO0]{2}.?[\dO0]{5}.?[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+).?Hours.?(\d+).?Minutes',
-            # Very loose pattern
-            r'(S[O0]\S+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+)\s+H\w+\s+(\d+)\s+M\w+'
+            
+            # Very loose pattern for poor OCR
+            r'(S[O0]\S+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+)\s+H\w+\s+(\d+)\s+M\w+',
+            
+            # Split across multiple lines pattern (for table rows that span lines)
+            r'(S[O0][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\s+(Regular[Tt]ime|Overtime)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
+            
+            # Handle OCR errors in order numbers (0 vs O, etc.)
+            r'([SO][O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})\s+([\w\s]*Time[\w\s]*)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d+)[\s\w]*(\d+)[\s\w]*',
+            
+            # Tab-separated format (in case table columns are preserved)
+            r'(S[O0][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\t+([\w\s]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d+)[^\d]*(\d+)'
         ]
         # Try each pattern until we find a match
         entry_match = None
@@ -235,6 +252,121 @@ def extract_labor_collection_entries(text):
                 except Exception as e:
                     print(f"Error parsing labor collection entry with alternative pattern: {e} in line: {line}")
     
+    # If no entries found with standard patterns, try advanced table extraction
+    if not entries:
+        print("\n⚠️  Standard patterns failed, trying advanced table extraction...")
+        entries = extract_table_structure(text)
+        
+        # Set employee name for all entries if we found it earlier
+        if entries and employee_name != "Current User":
+            for entry in entries:
+                entry['employee_name'] = employee_name
+    
+    # Log final results
+    print(f"\nFinal results: {len(entries)} labor collection entries extracted")
+    for i, entry in enumerate(entries, 1):
+        print(f"Entry {i}: {entry.get('order_number', 'NO ORDER')} - {entry.get('hours', 0)} hours")
+    
+    return entries
+
+def extract_table_structure(text):
+    """
+    Extract table structure from OCR text using advanced pattern matching
+    Specifically designed for labor collection reports with tabular data
+    """
+    if not text:
+        return []
+    
+    print("\n" + "="*50)
+    print("ADVANCED TABLE STRUCTURE EXTRACTION")
+    print("="*50)
+    
+    lines = text.split('\n')
+    entries = []
+    
+    # Find table data using column-based approach
+    # Look for lines that contain all the key elements: Order number, dates, times, hours
+    order_pattern = r'(S[O0][\dO0]{2}[-.\s]*[\dO0]{5}[-.\s]*[\dO0]{5})'
+    date_pattern = r'(\d{1,2}/\d{1,2}/\d{4})'
+    time_pattern = r'(\d{1,2}:\d{2}(?::\d{2})?\s*[APap][Mm])'
+    hours_pattern = r'(\d+)\s*[Hh]ours?\s*(\d+)\s*[Mm]inutes?'
+    
+    for i, line in enumerate(lines):
+        if not line.strip():
+            continue
+            
+        print(f"Analyzing line {i}: {line[:80]}{'...' if len(line) > 80 else ''}")
+        
+        # Check if this line contains the key components of a time entry
+        order_match = re.search(order_pattern, line, re.IGNORECASE)
+        dates = re.findall(date_pattern, line)
+        times = re.findall(time_pattern, line)
+        hours_match = re.search(hours_pattern, line, re.IGNORECASE)
+        
+        if order_match and len(dates) >= 2 and len(times) >= 2 and hours_match:
+            print(f"  ✓ Found complete entry on line {i}")
+            
+            try:
+                order_number = order_match.group(1).strip()
+                # Clean up order number (replace O with 0, remove extra spaces/dots)
+                order_number = re.sub(r'[^A-Z0-9\-]', '', order_number.upper())
+                order_number = order_number.replace('O', '0')  # Common OCR error
+                
+                start_date = dates[0]
+                end_date = dates[1] if len(dates) > 1 else dates[0]
+                start_time = times[0]
+                end_time = times[1] if len(times) > 1 else times[0]
+                
+                hours = int(hours_match.group(1))
+                minutes = int(hours_match.group(2))
+                decimal_hours = hours + (minutes / 60)
+                
+                # Construct full datetime strings
+                start_datetime_str = f"{start_date} {start_time}"
+                end_datetime_str = f"{end_date} {end_time}"
+                
+                # Try to parse the datetime to validate
+                try:
+                    start_dt = parser.parse(start_datetime_str)
+                    end_dt = parser.parse(end_datetime_str)
+                    
+                    entry = {
+                        'order_number': order_number,
+                        'labor_type': 'RegularTime',  # Default, could be enhanced
+                        'start_time': start_datetime_str,
+                        'end_time': end_datetime_str,
+                        'date': start_dt.date(),
+                        'date_str': start_dt.date().strftime('%Y-%m-%d'),
+                        'hours': round(decimal_hours, 2),
+                        'entry_type': 'service_order',
+                        'employee_name': 'Current User',  # Will be set by main parser
+                        'format_type': 'labor_collection_table'
+                    }
+                    
+                    entries.append(entry)
+                    print(f"  ✓ Successfully parsed entry: {order_number} - {decimal_hours} hours")
+                    
+                except Exception as parse_error:
+                    print(f"  ✗ Failed to parse datetime: {parse_error}")
+                    
+            except Exception as e:
+                print(f"  ✗ Failed to extract entry details: {e}")
+        else:
+            # Debug: show what was missing
+            missing = []
+            if not order_match:
+                missing.append("order number")
+            if len(dates) < 2:
+                missing.append(f"dates (found {len(dates)}, need 2)")
+            if len(times) < 2:
+                missing.append(f"times (found {len(times)}, need 2)")
+            if not hours_match:
+                missing.append("hours/minutes")
+            
+            if missing:
+                print(f"  - Missing: {', '.join(missing)}")
+    
+    print(f"\nTable extraction found {len(entries)} entries")
     return entries
 
 def extract_punch_clocks_entries(text):
