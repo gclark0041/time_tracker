@@ -1,24 +1,41 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+import sys
+from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
 block_cipher = None
 
+# Define paths
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Create the analysis
 a = Analysis(
-    ['build_app.py'],
-    pathex=[],
+    ['desktop_launcher.py'],
+    pathex=[current_dir],
     binaries=[],
     datas=[
         ('templates', 'templates'),
         ('static', 'static'),
-        ('instance', 'instance'),
     ],
     hiddenimports=[
         'sqlalchemy.sql.default_comparator',
-        'pandas',
         'plotly',
-        'xlsxwriter',
+        'pandas',
+        'werkzeug',
+        'flask_wtf.recaptcha',
+        'email_validator',
+        'flask_login',
+        'flask_wtf',
+        'flask_sqlalchemy',
+        'pytesseract',
+        'cv2',
+        'dateutil',
+        'numpy',
+        'waitress',
     ],
     hookspath=[],
-    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     win_no_prefer_redirects=False,
@@ -27,8 +44,10 @@ a = Analysis(
     noarchive=False,
 )
 
+# Create the PYZ archive
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
+# Create the EXE
 exe = EXE(
     pyz,
     a.scripts,
@@ -39,15 +58,11 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon='static/favicon.ico' if os.path.exists('static/favicon.ico') else None,
+    console=False,
+    icon=None,
 )
 
+# Create the COLLECT
 coll = COLLECT(
     exe,
     a.binaries,

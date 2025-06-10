@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2><i class="fas fa-users-cog me-2"></i> User Management</h2>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fas fa-user-plus me-1"></i> Add New User
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">Users</h5>
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group">
+                            <input type="text" id="userSearch" class="form-control" placeholder="Search users...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.get_full_name() }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                    <span class="badge bg-danger">Admin</span>
+                                    {% elif user.is_manager %}
+                                    <span class="badge bg-warning text-dark">Manager</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Employee</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.department or "—" }}</td>
+                                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else "Never" }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editUserModal" 
+                                                data-user-id="{{ user.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        {% if not user.is_admin or current_user.id != user.id %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteUserModal" 
+                                                data-user-id="{{ user.id }}"
+                                                data-username="{{ user.username }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not users %}
+                <div class="text-center p-4">
+                    <p class="text-muted">No users found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_add_user') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username*</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email*</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Password*</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label">Confirm Password*</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" class="form-control" id="department" name="department">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="position" class="form-label">Position/Title</label>
+                            <input type="text" class="form-control" id="position" name="position">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="hourly_rate" class="form-label">Hourly Rate ($)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="hourly_rate" name="hourly_rate">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">User Role</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="role" id="roleEmployee" value="employee" checked>
+                                    <label class="form-check-label" for="roleEmployee">Employee</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="role" id="roleManager" value="manager">
+                                    <label class="form-check-label" for="roleManager">Manager</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="role" id="roleAdmin" value="admin">
+                                    <label class="form-check-label" for="roleAdmin">Admin</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="managerSection" class="row mb-3" style="display:none;">
+                        <div class="col-12">
+                            <label for="manager_id" class="form-label">Assign to Manager</label>
+                            <select class="form-select" id="manager_id" name="manager_id">
+                                <option value="">-- None --</option>
+                                {% for manager in managers %}
+                                <option value="{{ manager.id }}">{{ manager.get_full_name() }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_edit_user') }}">
+                <input type="hidden" name="user_id" id="edit_user_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields will be populated via JavaScript -->
+                    <div id="editFormContent">Loading...</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_delete_user') }}">
+                <input type="hidden" name="user_id" id="delete_user_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete user <strong id="delete_username"></strong>?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide manager selection based on role
+        const roleRadios = document.querySelectorAll('input[name="role"]');
+        roleRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const managerSection = document.getElementById('managerSection');
+                if (this.value === 'employee') {
+                    managerSection.style.display = 'block';
+                } else {
+                    managerSection.style.display = 'none';
+                    document.getElementById('manager_id').value = '';
+                }
+            });
+        });
+        
+        // Setup edit user modal
+        $('#editUserModal').on('show.bs.modal', function (event) {
+            const button = event.relatedTarget
+            const userId = button.getAttribute('data-user-id')
+            const modalContent = document.getElementById('editFormContent')
+            
+            // Set the user ID in the form
+            document.getElementById('edit_user_id').value = userId
+            
+            // Fetch user data for editing
+            fetch(`{{ url_for('admin_get_user') }}?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Populate the form with user data
+                    modalContent.innerHTML = data.html
+                    
+                    // Re-attach event listeners for role radio buttons
+                    const editRoleRadios = document.querySelectorAll('#editUserModal input[name="role"]');
+                    const editManagerSection = document.getElementById('editManagerSection');
+                    
+                    editRoleRadios.forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            if (this.value === 'employee') {
+                                editManagerSection.style.display = 'block';
+                            } else {
+                                editManagerSection.style.display = 'none';
+                                document.getElementById('edit_manager_id').value = '';
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading user data:', error)
+                    modalContent.innerHTML = '<div class="alert alert-danger">Error loading user data</div>'
+                })
+        })
+        
+        // Setup delete user modal
+        $('#deleteUserModal').on('show.bs.modal', function (event) {
+            const button = event.relatedTarget
+            const userId = button.getAttribute('data-user-id')
+            const username = button.getAttribute('data-username')
+            
+            document.getElementById('delete_user_id').value = userId
+            document.getElementById('delete_username').textContent = username
+        })
+        
+        // User search functionality
+        document.getElementById('userSearch').addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const username = row.cells[0].textContent.toLowerCase();
+                const name = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                const department = row.cells[4].textContent.toLowerCase();
+                
+                if (username.includes(searchText) || 
+                    name.includes(searchText) || 
+                    email.includes(searchText) ||
+                    department.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

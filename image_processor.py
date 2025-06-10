@@ -368,54 +368,147 @@ def extract_generic_time_entries(text):
     print(f"Generic extraction found {len(valid_entries)} possible time entries")
     return valid_entries
 
-def parse_image_for_time_entries(image_path):
-    """Process an image and extract time entry data"""
-    print(f"\nProcessing image: {image_path}\n")
+def parse_image_for_time_entries(image_path, format_type='standard'):
+    """Process an image and extract time entry data based on the specified format
     
-    # Check if Tesseract is available
-    if not tesseract_available:
-        logger.warning("Tesseract OCR is not available. Cannot process image.")
-        # Return a sample entry for demo purposes when deployed without Tesseract
-        if os.environ.get('RENDER', '') == 'true':
-            logger.info("Running on Render: returning demo data instead of OCR")
-            # Create a sample time entry for demonstration
-            return [{
-                'employee_name': 'John Doe',
-                'order_number': 'SO-12345',
-                'date': datetime.now().date(),
-                'date_str': datetime.now().strftime('%Y-%m-%d'),
-                'entry_type': 'service_order',
-                'hours': 4.25,
-                'start_time': '08:00 AM',
-                'end_time': '12:15 PM',
-                'from_demo': True
-            }]
-        return []
+    Args:
+        image_path (str): Path to the image file
+        format_type (str): Type of time entry format - 'standard' or 'generic'
+    """
+    print(f"\nProcessing image: {image_path} with format: {format_type}\n")
     
-    # Extract text using OCR
-    text = extract_text_from_image(image_path)
-    if not text:
-        logger.error("Could not extract text from image")
-        # Return a sample entry on error in production environment
-        if os.environ.get('RENDER', '') == 'true':
-            return [{
-                'employee_name': 'Sample Employee',
-                'order_number': 'ERR-12345',
-                'date': datetime.now().date(),
-                'date_str': datetime.now().strftime('%Y-%m-%d'),
-                'entry_type': 'service_order',
-                'hours': 2.50,
-                'from_demo': True
-            }]
-        return []
-    
-    # Try to extract time entries
-    entries = extract_time_entries(text)
-    
-    # Log results
-    if entries:
-        logger.info(f"Successfully extracted {len(entries)} time entries")
-    else:
-        logger.warning("No time entries could be extracted")
+    try:
+        # Verify image exists
+        if not os.path.exists(image_path):
+            logger.error(f"Image file not found at path: {image_path}")
+            print(f"ERROR: Image file not found at path: {image_path}")
+            # Return demo data in production
+            if os.environ.get('RENDER', '') == 'true':
+                print("Returning demo data since file not found")
+                return get_demo_entries('Missing File', format_type)
+            return []
+
+        # Check if Tesseract is available
+        if not tesseract_available:
+            logger.warning("Tesseract OCR is not available. Cannot process image.")
+            print("WARNING: Tesseract OCR is not available. Using demo data instead.")
+            # Return a sample entry for demo purposes when deployed without Tesseract
+            if os.environ.get('RENDER', '') == 'true':
+                logger.info("Running on Render: returning demo data instead of OCR")
+                return get_demo_entries('No Tesseract', format_type)
+            return []
         
-    return entries
+        # Extract text using OCR
+        try:
+            text = extract_text_from_image(image_path)
+            print(f"Extracted text length: {len(text) if text else 0} characters")
+            
+            if not text:
+                logger.error("Could not extract text from image")
+                print("ERROR: Could not extract text from image")
+                # Return a sample entry on error in production environment
+                if os.environ.get('RENDER', '') == 'true':
+                    return get_demo_entries('No Text', format_type)
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error in OCR text extraction: {str(e)}")
+            print(f"ERROR in OCR text extraction: {str(e)}")
+            if os.environ.get('RENDER', '') == 'true':
+                return get_demo_entries('OCR Error', format_type)
+            return []
+        
+        # Try to extract time entries based on format type
+        try:
+            # Choose extraction method based on format type
+            if format_type == 'generic':
+                print("Using generic format extraction method")
+                entries = extract_generic_time_entries(text)
+            else:  # default to standard
+                print("Using standard format extraction method")
+                entries = extract_time_entries(text)
+            
+            # Log results
+            if entries:
+                logger.info(f"Successfully extracted {len(entries)} time entries using {format_type} format")
+                print(f"Successfully extracted {len(entries)} time entries using {format_type} format")
+                print(f"First entry: {entries[0]}")
+                
+                # Add format type to each entry
+                for entry in entries:
+                    entry['format_type'] = format_type
+                    
+                return entries
+            else:
+                logger.warning(f"No time entries could be extracted using {format_type} format")
+                print(f"WARNING: No time entries could be extracted using {format_type} format")
+                
+                # Try alternative format if first one fails
+                if format_type == 'standard':
+                    print("Trying generic format as fallback...")
+                    fallback_entries = extract_generic_time_entries(text)
+                    if fallback_entries:
+                        logger.info(f"Fallback successful: extracted {len(fallback_entries)} entries using generic format")
+                        print(f"Fallback successful: extracted {len(fallback_entries)} entries using generic format")
+                        # Add format type to each entry
+                        for entry in fallback_entries:
+                            entry['format_type'] = 'generic (fallback)'
+                        return fallback_entries
+                
+                # Return demo data in production if no entries extracted
+                if os.environ.get('RENDER', '') == 'true':
+                    return get_demo_entries('No Entries', format_type)
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error extracting time entries with {format_type} format: {str(e)}")
+            print(f"ERROR extracting time entries with {format_type} format: {str(e)}")
+            if os.environ.get('RENDER', '') == 'true':
+                return get_demo_entries('Parse Error', format_type)
+            return []
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in parse_image_for_time_entries: {str(e)}")
+        print(f"UNEXPECTED ERROR in parse_image_for_time_entries: {str(e)}")
+        # Return demo data in production
+        if os.environ.get('RENDER', '') == 'true':
+            return get_demo_entries('Unknown Error', format_type)
+        return []
+
+def get_demo_entries(error_type, format_type='standard'):
+    """Generate demo time entries for testing/demo purposes
+    
+    Args:
+        error_type (str): Type of error that triggered demo entry generation
+        format_type (str): Format type being used ('standard' or 'generic')
+    """
+    print(f"Generating demo entries due to: {error_type} with format: {format_type}")
+    
+    if format_type == 'generic':
+        # Generate a more generic demo entry without order number
+        return [{
+            'employee_name': 'Jane Smith',
+            'task_description': f'Demo Task ({error_type})',
+            'date': datetime.now().date(),
+            'date_str': datetime.now().strftime('%Y-%m-%d'),
+            'entry_type': 'time_entry',
+            'hours': 3.5,
+            'start_time': '09:30 AM',
+            'end_time': '01:00 PM',
+            'from_demo': True,
+            'format_type': format_type
+        }]
+    else:
+        # Standard format demo entry with order number
+        return [{
+            'employee_name': 'John Doe',
+            'order_number': f'DEMO-{error_type}',
+            'date': datetime.now().date(),
+            'date_str': datetime.now().strftime('%Y-%m-%d'),
+            'entry_type': 'service_order',
+            'hours': 4.25,
+            'start_time': '08:00 AM',
+            'end_time': '12:15 PM',
+            'from_demo': True,
+            'format_type': format_type
+        }]

@@ -1,88 +1,163 @@
-# Time Tracker Application
+# Time Tracker Pro
 
-A web-based application for tracking work time on orders and generating reports.
+A modern web application for tracking employee time with image upload and OCR capabilities, comprehensive reporting, and a clean, intuitive interface.
 
 ## Features
 
-- **Order Time Tracking**: Track start and end times for work orders
-- **Real-time Duration Display**: See elapsed time for active orders updated in real-time
-- **Employee Productivity Reports**: Analyze work patterns and efficiency
-- **Order Processing Time Reports**: Visualize how long orders take to complete
-- **Data Export**: Export time tracking data to Excel for further analysis
+- **Manual Time Entry**: Easy form-based time entry with multiple categories (Service Order, Vacation, Personal, Shop, Non-Billable, Drive Time)
+- **Image Upload & OCR**: Upload images of time sheets and automatically extract time data
+- **Real-time Search**: Filter and search through time entries instantly
+- **Comprehensive Reports**: Generate PDF reports in multiple formats:
+  - Summary Report: Overview of hours by employee and type
+  - Detailed Report: Complete list of all time entries
+  - Employee Report: Individual employee time breakdowns
+  - Service Order Report: Time tracking by service order
+- **Modern UI**: Responsive design that works on desktop and mobile devices
+- **Data Persistence**: SQLite database for reliable data storage
+
+## Prerequisites
+
+- Python 3.8 or higher
+- Node.js (for running the frontend)
+- Tesseract OCR (for image text extraction)
 
 ## Installation
 
-1. Clone this repository to your local machine
-2. Install required packages:
+### 1. Install Python Dependencies
+
+Navigate to the backend directory and install required packages:
 
 ```bash
+cd backend
 pip install -r requirements.txt
 ```
 
-## Usage
+### 2. Install Tesseract OCR
 
-1. Start the application:
+**Windows:**
+1. Download the installer from: https://github.com/UB-Mannheim/tesseract/wiki
+2. Run the installer and note the installation path
+3. Add Tesseract to your PATH environment variable
 
+**Mac:**
 ```bash
-python app.py
+brew install tesseract
 ```
 
-2. Open your web browser and navigate to: `http://127.0.0.1:5000/`
+**Linux:**
+```bash
+sudo apt-get install tesseract-ocr
+```
 
-## Using the Application
+### 3. Initialize the Database
 
-### Tracking Time
+The database will be automatically created when you first run the backend.
 
-1. Click "New Order" to start tracking time for a new order
-2. Enter the order number and employee name
-3. When work is complete, click "Complete" to stop tracking
+## Running the Application
 
-### Generating Reports
+### Option 1: Using the Batch File (Windows)
 
-1. Click "Reports" in the navigation menu
-2. Choose the type of report you want to generate:
-   - Order Processing Times
-   - Employee Productivity
-3. Select date range and click "Generate Report"
-4. View visualizations and data tables of your time tracking information
-5. Export data to Excel for further analysis
+Simply double-click `run_app.bat` in the project root directory.
 
-## Tech Stack
+### Option 2: Manual Start
 
-- **Backend**: Python, Flask, SQLAlchemy, Flask-Login
-- **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
-- **Visualization**: Plotly
-- **Database**: SQLite
-- **OCR**: Tesseract OCR, OpenCV, pytesseract
+1. **Start the Backend Server:**
+   ```bash
+   cd backend
+   python app.py
+   ```
+   The backend will run on http://localhost:5000
 
-## Deployment on Render
+2. **Open the Frontend:**
+   Open `index.html` in your web browser (Chrome, Firefox, or Edge recommended)
 
-This application is ready to be deployed on Render, which supports Python web applications and system dependencies like Tesseract OCR.
+## Usage Guide
 
-### Deployment Steps:
+### Manual Time Entry
 
-1. Create a free account on [Render](https://render.com/)
-2. From your dashboard, click on "New" and select "Web Service"
-3. Connect your GitHub repository or use the option to deploy from an existing repository
-4. Configure the following settings:
-   - **Name**: time-tracker (or your preferred name)
-   - **Environment**: Python 3
-   - **Region**: Choose the closest region to your users
-   - **Branch**: main (or your default branch)
-   - **Build Command**: `chmod +x build.sh && ./build.sh`
-   - **Start Command**: `python app.py`
-   - **Plan**: Free
+1. Click on the "Manual Entry" tab
+2. Fill in the required fields:
+   - Employee Name
+   - Entry Type (Service Order requires an order number)
+   - Start and End Date/Time
+   - Optional notes
+3. Click "Save Entry"
 
-5. Add the following environment variables:
-   - `RENDER=true`
-   - `PYTHON_VERSION=3.10.4`
+### Upload Time Sheet Image
 
-6. Click "Create Web Service"
+1. Click on the "Upload Image" tab
+2. Either drag and drop an image or click to browse
+3. Review the extracted data
+4. Click "Confirm & Save All" to save the entries
 
-The build will take a few minutes to complete. Once finished, your Time Tracker application will be available at the URL provided by Render.
+### View and Manage Entries
 
-### Important Notes:
+1. Click on the "View Entries" tab
+2. Use the search bar to filter entries
+3. Click the edit (✏️) button to modify an entry
+4. Click the delete (🗑️) button to remove an entry
 
-- The free plan on Render will spin down after periods of inactivity and spin up when receiving new requests
-- The database is stored on the filesystem, so data will persist between deployments but not indefinitely
-- For production use, consider upgrading to a paid plan or implementing a persistent database solution
+### Generate Reports
+
+1. Click on the "Reports" tab
+2. Select report type:
+   - Summary: Overview by employee and time type
+   - Detailed: All entries with full details
+   - Employee: Breakdown by individual employee
+   - Service Order: Time grouped by order number
+3. Set date range and optional employee filter
+4. Click "Generate PDF Report"
+5. The report will download automatically
+
+## Data Storage
+
+- All time entries are stored in `backend/timetracker.db`
+- The database is automatically backed up to localStorage for redundancy
+- Images are processed but not stored (only extracted data is saved)
+
+## Troubleshooting
+
+### Backend Won't Start
+- Ensure Python 3.8+ is installed: `python --version`
+- Check if port 5000 is available
+- Verify all dependencies are installed
+
+### OCR Not Working
+- Ensure Tesseract is installed and in PATH
+- Check image quality (clear, well-lit images work best)
+- Verify image format (JPG, PNG, GIF supported)
+
+### PDF Reports Not Generating
+- Check that ReportLab is installed: `pip install reportlab`
+- Ensure the backend server is running
+- Check browser console for errors
+
+## API Documentation
+
+### Endpoints
+
+- `GET /api/entries` - Retrieve all time entries
+- `POST /api/entries` - Create a new time entry
+- `PUT /api/entries/<id>` - Update an existing entry
+- `DELETE /api/entries/<id>` - Delete an entry
+- `POST /api/ocr` - Process image and extract time data
+- `POST /api/report` - Generate PDF report
+- `GET /api/stats` - Get summary statistics
+
+## Future Enhancements
+
+- Real OCR integration with cloud services (Google Vision, AWS Textract)
+- User authentication and multi-user support
+- Email report scheduling
+- Mobile app version
+- Excel export functionality
+- Time approval workflow
+- Integration with payroll systems
+
+## License
+
+This project is provided as-is for personal and commercial use.
+
+## Support
+
+For issues or questions, please check the troubleshooting section or create an issue in the project repository.

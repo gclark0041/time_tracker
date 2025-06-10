@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <h2><i class="fas fa-cogs me-2"></i> Admin Settings</h2>
+        <p class="text-muted">Configure global application settings and defaults</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Settings Menu</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#general" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                    <i class="fas fa-sliders-h me-2"></i> General Settings
+                </a>
+                <a href="#timeTracking" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-clock me-2"></i> Time Tracking
+                </a>
+                <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-bell me-2"></i> Notifications
+                </a>
+                <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-shield-alt me-2"></i> Security
+                </a>
+                <a href="#backupRestore" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-database me-2"></i> Backup & Restore
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Quick Links</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('admin_user_management') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users me-2"></i> User Management
+                </a>
+                <a href="{{ url_for('admin_reports') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-bar me-2"></i> Reports
+                </a>
+                <a href="#" class="list-group-item list-group-item-action text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Error Logs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="tab-content">
+            <!-- General Settings -->
+            <div class="tab-pane fade show active" id="general">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">General Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_update_settings', section='general') }}">
+                            <div class="mb-3">
+                                <label for="companyName" class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="companyName" name="company_name" value="{{ settings.get('company_name', '') }}">
+                                <small class="text-muted">This will appear in reports and application title</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="defaultCurrency" class="form-label">Default Currency</label>
+                                <select class="form-select" id="defaultCurrency" name="default_currency">
+                                    <option value="USD" {% if settings.get('default_currency') == 'USD' %}selected{% endif %}>USD ($)</option>
+                                    <option value="EUR" {% if settings.get('default_currency') == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                                    <option value="GBP" {% if settings.get('default_currency') == 'GBP' %}selected{% endif %}>GBP (£)</option>
+                                    <option value="CAD" {% if settings.get('default_currency') == 'CAD' %}selected{% endif %}>CAD ($)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="timezone" class="form-label">Default Time Zone</label>
+                                <select class="form-select" id="timezone" name="timezone">
+                                    <option value="UTC" {% if settings.get('timezone') == 'UTC' %}selected{% endif %}>UTC</option>
+                                    <option value="America/New_York" {% if settings.get('timezone') == 'America/New_York' %}selected{% endif %}>Eastern Time (US & Canada)</option>
+                                    <option value="America/Chicago" {% if settings.get('timezone') == 'America/Chicago' %}selected{% endif %}>Central Time (US & Canada)</option>
+                                    <option value="America/Denver" {% if settings.get('timezone') == 'America/Denver' %}selected{% endif %}>Mountain Time (US & Canada)</option>
+                                    <option value="America/Los_Angeles" {% if settings.get('timezone') == 'America/Los_Angeles' %}selected{% endif %}>Pacific Time (US & Canada)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableDesktopMode" name="enable_desktop_mode" {% if settings.get('enable_desktop_mode') %}checked{% endif %}>
+                                    <label class="form-check-label" for="enableDesktopMode">Enable Desktop Mode</label>
+                                </div>
+                                <small class="text-muted">Run as a desktop application with local data storage</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Time Tracking Settings -->
+            <div class="tab-pane fade" id="timeTracking">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Time Tracking Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_update_settings', section='time_tracking') }}">
+                            <div class="mb-3">
+                                <label for="workWeekStart" class="form-label">Work Week Start Day</label>
+                                <select class="form-select" id="workWeekStart" name="work_week_start">
+                                    <option value="0" {% if settings.get('work_week_start') == 0 %}selected{% endif %}>Sunday</option>
+                                    <option value="1" {% if settings.get('work_week_start') == 1 %}selected{% endif %}>Monday</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="defaultWorkHours" class="form-label">Default Daily Work Hours</label>
+                                <input type="number" class="form-control" id="defaultWorkHours" name="default_work_hours" value="{{ settings.get('default_work_hours', 8) }}" min="1" max="24" step="0.5">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="roundTimesToNearest" name="round_times_to_nearest" {% if settings.get('round_times_to_nearest') %}checked{% endif %}>
+                                    <label class="form-check-label" for="roundTimesToNearest">Round Times to Nearest</label>
+                                </div>
+                                <select class="form-select mt-2" id="roundingInterval" name="rounding_interval" {% if not settings.get('round_times_to_nearest') %}disabled{% endif %}>
+                                    <option value="5" {% if settings.get('rounding_interval') == 5 %}selected{% endif %}>5 minutes</option>
+                                    <option value="10" {% if settings.get('rounding_interval') == 10 %}selected{% endif %}>10 minutes</option>
+                                    <option value="15" {% if settings.get('rounding_interval') == 15 %}selected{% endif %}>15 minutes</option>
+                                    <option value="30" {% if settings.get('rounding_interval') == 30 %}selected{% endif %}>30 minutes</option>
+                                    <option value="60" {% if settings.get('rounding_interval') == 60 %}selected{% endif %}>60 minutes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="requireOrderNumber" name="require_order_number" {% if settings.get('require_order_number') %}checked{% endif %}>
+                                    <label class="form-check-label" for="requireOrderNumber">Require Order Number</label>
+                                </div>
+                                <small class="text-muted">When checked, time entries must have an order number</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="allowTimeOverlap" name="allow_time_overlap" {% if settings.get('allow_time_overlap') %}checked{% endif %}>
+                                    <label class="form-check-label" for="allowTimeOverlap">Allow Time Overlap</label>
+                                </div>
+                                <small class="text-muted">When checked, users can create overlapping time entries</small>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications Settings -->
+            <div class="tab-pane fade" id="notifications">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Notification Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_update_settings', section='notifications') }}">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications" name="email_notifications" {% if settings.get('email_notifications') %}checked{% endif %}>
+                                    <label class="form-check-label" for="emailNotifications">Enable Email Notifications</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="emailFrom" class="form-label">From Email Address</label>
+                                <input type="email" class="form-control" id="emailFrom" name="email_from" value="{{ settings.get('email_from', '') }}" {% if not settings.get('email_notifications') %}disabled{% endif %}>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="notifyMissedTimesheet" name="notify_missed_timesheet" {% if settings.get('notify_missed_timesheet') %}checked{% endif %} {% if not settings.get('email_notifications') %}disabled{% endif %}>
+                                    <label class="form-check-label" for="notifyMissedTimesheet">Notify Users About Missing Timesheets</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="notifyManagers" name="notify_managers" {% if settings.get('notify_managers') %}checked{% endif %} {% if not settings.get('email_notifications') %}disabled{% endif %}>
+                                    <label class="form-check-label" for="notifyManagers">Notify Managers About Team Activities</label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Settings -->
+            <div class="tab-pane fade" id="security">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Security Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_update_settings', section='security') }}">
+                            <div class="mb-3">
+                                <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                <input type="number" class="form-control" id="sessionTimeout" name="session_timeout" value="{{ settings.get('session_timeout', 30) }}" min="5" max="480">
+                                <small class="text-muted">How long before an inactive user is logged out</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="passwordPolicy" class="form-label">Password Requirements</label>
+                                <select class="form-select" id="passwordPolicy" name="password_policy">
+                                    <option value="basic" {% if settings.get('password_policy') == 'basic' %}selected{% endif %}>Basic (min 6 characters)</option>
+                                    <option value="standard" {% if settings.get('password_policy') == 'standard' %}selected{% endif %}>Standard (min 8 chars, letter, number)</option>
+                                    <option value="strong" {% if settings.get('password_policy') == 'strong' %}selected{% endif %}>Strong (min 10 chars, letter, number, symbol)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="forcePasswordReset" name="force_password_reset" {% if settings.get('force_password_reset') %}checked{% endif %}>
+                                    <label class="form-check-label" for="forcePasswordReset">Force Password Reset Every 90 Days</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="allowRegistration" name="allow_registration" {% if settings.get('allow_registration') %}checked{% endif %}>
+                                    <label class="form-check-label" for="allowRegistration">Allow Public Registration</label>
+                                </div>
+                                <small class="text-muted">When disabled, only admins can create new accounts</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Backup & Restore -->
+            <div class="tab-pane fade" id="backupRestore">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Backup & Restore</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>Database Backup</h6>
+                            <p class="text-muted">Create a complete backup of the application database</p>
+                            <form method="POST" action="{{ url_for('admin_backup_database') }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-download me-1"></i> Create Backup
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-4">
+                            <h6>Restore from Backup</h6>
+                            <p class="text-muted">Warning: This will overwrite all current data</p>
+                            <form method="POST" action="{{ url_for('admin_restore_database') }}" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="backupFile" class="form-label">Backup File</label>
+                                    <input class="form-control" type="file" id="backupFile" name="backup_file">
+                                </div>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-upload me-1"></i> Restore from Backup
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div>
+                            <h6>Auto Backup Settings</h6>
+                            <form method="POST" action="{{ url_for('admin_update_settings', section='backup') }}">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableAutoBackup" name="enable_auto_backup" {% if settings.get('enable_auto_backup') %}checked{% endif %}>
+                                        <label class="form-check-label" for="enableAutoBackup">Enable Automatic Backups</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="backupFrequency" class="form-label">Backup Frequency</label>
+                                    <select class="form-select" id="backupFrequency" name="backup_frequency" {% if not settings.get('enable_auto_backup') %}disabled{% endif %}>
+                                        <option value="daily" {% if settings.get('backup_frequency') == 'daily' %}selected{% endif %}>Daily</option>
+                                        <option value="weekly" {% if settings.get('backup_frequency') == 'weekly' %}selected{% endif %}>Weekly</option>
+                                        <option value="monthly" {% if settings.get('backup_frequency') == 'monthly' %}selected{% endif %}>Monthly</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="backupRetention" class="form-label">Keep Backups For</label>
+                                    <select class="form-select" id="backupRetention" name="backup_retention" {% if not settings.get('enable_auto_backup') %}disabled{% endif %}>
+                                        <option value="7" {% if settings.get('backup_retention') == 7 %}selected{% endif %}>7 days</option>
+                                        <option value="30" {% if settings.get('backup_retention') == 30 %}selected{% endif %}>30 days</option>
+                                        <option value="90" {% if settings.get('backup_retention') == 90 %}selected{% endif %}>90 days</option>
+                                        <option value="365" {% if settings.get('backup_retention') == 365 %}selected{% endif %}>1 year</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable/disable notification settings based on email notifications checkbox
+        const emailNotificationsCheckbox = document.getElementById('emailNotifications');
+        const emailFrom = document.getElementById('emailFrom');
+        const notifyMissedTimesheet = document.getElementById('notifyMissedTimesheet');
+        const notifyManagers = document.getElementById('notifyManagers');
+        
+        if (emailNotificationsCheckbox) {
+            emailNotificationsCheckbox.addEventListener('change', function() {
+                const enabled = this.checked;
+                emailFrom.disabled = !enabled;
+                notifyMissedTimesheet.disabled = !enabled;
+                notifyManagers.disabled = !enabled;
+            });
+        }
+        
+        // Enable/disable rounding interval based on round times checkbox
+        const roundTimesToNearest = document.getElementById('roundTimesToNearest');
+        const roundingInterval = document.getElementById('roundingInterval');
+        
+        if (roundTimesToNearest) {
+            roundTimesToNearest.addEventListener('change', function() {
+                roundingInterval.disabled = !this.checked;
+            });
+        }
+        
+        // Enable/disable backup settings based on auto backup checkbox
+        const enableAutoBackup = document.getElementById('enableAutoBackup');
+        const backupFrequency = document.getElementById('backupFrequency');
+        const backupRetention = document.getElementById('backupRetention');
+        
+        if (enableAutoBackup) {
+            enableAutoBackup.addEventListener('change', function() {
+                const enabled = this.checked;
+                backupFrequency.disabled = !enabled;
+                backupRetention.disabled = !enabled;
+            });
+        }
+        
+        // Handle tab navigation via URL hash
+        if (window.location.hash) {
+            const hash = window.location.hash;
+            const tabLinks = document.querySelectorAll('.list-group-item');
+            
+            tabLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === hash) {
+                    link.classList.add('active');
+                }
+            });
+            
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabPanes.forEach(pane => {
+                pane.classList.remove('show', 'active');
+                if (pane.id === hash.substring(1)) {
+                    pane.classList.add('show', 'active');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
