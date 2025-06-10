@@ -20,6 +20,15 @@ def extract_labor_collection_entries(text):
     entries = []
     lines = text.split('\n')
     
+    # Extract employee name from greeting (e.g., "Dear Greg Clark")
+    employee_name = "Current User"  # Default name
+    for i, line in enumerate(lines[:10]):  # Check first 10 lines
+        name_match = re.search(r'Dear\s+([A-Za-z]+\s+[A-Za-z]+)', line)
+        if name_match:
+            employee_name = name_match.group(1)
+            print(f"Found employee name: {employee_name}")
+            break
+            
     # Look for the table header that indicates a Labor Collection report
     header_pattern = r'Order\s+Number\s+Labor\s+Type\s+Start\s+Time\s+End\s+Time\s+Hours'
     header_found = False
@@ -39,7 +48,7 @@ def extract_labor_collection_entries(text):
             
         # Pattern for labor collection entries
         # Order Number, Labor Type, Start Time, End Time, Hours
-        entry_pattern = r'([A-Z0-9\-]+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes'
+        entry_pattern = r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes'
         entry_match = re.search(entry_pattern, line)
         
         if entry_match:
@@ -67,7 +76,7 @@ def extract_labor_collection_entries(text):
                     'date_str': start_time.date().strftime('%Y-%m-%d'),
                     'hours': round(decimal_hours, 2),
                     'entry_type': 'service_order',
-                    'employee_name': 'Current User',  # Will be replaced with logged-in user
+                    'employee_name': employee_name,
                     'format_type': 'labor_collection'
                 }
                 
@@ -79,7 +88,7 @@ def extract_labor_collection_entries(text):
                 
         else:
             # Try alternative format with different spacing
-            alt_pattern = r'([A-Z0-9\-]+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes'
+            alt_pattern = r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes'
             alt_match = re.search(alt_pattern, line)
             
             if alt_match:
@@ -107,7 +116,7 @@ def extract_labor_collection_entries(text):
                         'date_str': start_time.date().strftime('%Y-%m-%d'),
                         'hours': round(decimal_hours, 2),
                         'entry_type': 'service_order',
-                        'employee_name': 'Current User',
+                        'employee_name': employee_name,
                         'format_type': 'labor_collection'
                     }
                     
