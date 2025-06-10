@@ -84,24 +84,28 @@ def extract_labor_collection_entries(text):
         
         # Enhanced patterns for labor collection entries with variations for OCR errors
         # Order Number, Labor Type, Start Time, End Time, Hours
+        # Updated to handle $ being read instead of S
         entry_patterns = [
-            # Standard format with exact spacing
-            r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
+            # Standard format with exact spacing (handles $ and S)
+            r'([$S][O0$][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
             
             # Flexible spacing and punctuation
-            r'(S[O0][\dO0]{2}.?[\dO0]{5}.?[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+).?Hours.?(\d+).?Minutes',
+            r'([$S][O0$][\dO0]{2}.?[\dO0]{5}.?[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+).?Hours.?(\d+).?Minutes',
             
             # Very loose pattern for poor OCR
-            r'(S[O0]\S+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+)\s+H\w+\s+(\d+)\s+M\w+',
+            r'([$S][O0$]\S+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+)\s+H\w+\s+(\d+)\s+M\w+',
             
             # Split across multiple lines pattern (for table rows that span lines)
-            r'(S[O0][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\s+(Regular[Tt]ime|Overtime)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
+            r'([$S][O0$][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\s+(Regular[Tt]ime|Overtime)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
             
-            # Handle OCR errors in order numbers (0 vs O, etc.)
-            r'([SO][O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})\s+([\w\s]*Time[\w\s]*)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d+)[\s\w]*(\d+)[\s\w]*',
+            # Handle OCR errors in order numbers (0 vs O, $ vs S, etc.)
+            r'([SO$][O0$][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})\s+([\w\s]*Time[\w\s]*)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d{1,2}/\d{1,2}/\d{4}[\s\d:APM]+)\s+(\d+)[\s\w]*(\d+)[\s\w]*',
             
             # Tab-separated format (in case table columns are preserved)
-            r'(S[O0][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\t+([\w\s]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d+)[^\d]*(\d+)'
+            r'([$S][O0$][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\t+([\w\s]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d{1,2}/\d{1,2}/\d{4}[^\t]+)\t+(\d+)[^\d]*(\d+)',
+            
+            # Handle underscores and spacing issues in times/hours
+            r'([$S][O0$][\dO0]{2}[-.][\dO0]{5}[-.][\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})_?\s*(\d+)\s+Hours\s+(\d+)\s+Minutes'
         ]
         # Try each pattern until we find a match
         entry_match = None
@@ -118,6 +122,11 @@ def extract_labor_collection_entries(text):
         if entry_match:
             try:
                 order_number = entry_match.group(1).strip()
+                # Clean up order number (replace common OCR errors)
+                order_number = re.sub(r'[^A-Z0-9\-]', '', order_number.upper())
+                order_number = order_number.replace('$', 'S')  # $ often read as S
+                order_number = order_number.replace('O', '0')  # O often read as 0
+                
                 labor_type = entry_match.group(2).strip()
                 start_time_str = entry_match.group(3).strip()
                 end_time_str = entry_match.group(4).strip()
@@ -155,8 +164,8 @@ def extract_labor_collection_entries(text):
             if header_found and i > header_line_index and 'SO' in line and ('AM' in line or 'PM' in line):
                 print("Attempting direct parsing of line containing order number and times")
                 
-                # Try to extract order number directly
-                order_match = re.search(r'(S[O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})', line)
+                # Try to extract order number directly (handle $ as S)
+                order_match = re.search(r'([$S][O0$][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})', line)
                 
                 # Try to extract times directly
                 time_matches = re.findall(r'(\d{1,2}/\d{1,2}/\d{4}[^\d]+?\d{1,2}:\d{2}:\d{2}\s*[APM]{2})', line)
@@ -169,6 +178,11 @@ def extract_labor_collection_entries(text):
                     try:
                         # Create a manual match object
                         order_number = order_match.group(1)
+                        # Clean up order number (replace common OCR errors)
+                        order_number = re.sub(r'[^A-Z0-9\-]', '', order_number.upper())
+                        order_number = order_number.replace('$', 'S')  # $ often read as S
+                        order_number = order_number.replace('O', '0')  # O often read as 0
+                        
                         start_time_str = time_matches[0]
                         end_time_str = time_matches[1]
                         hours = int(hours_match.group(1))
@@ -202,8 +216,8 @@ def extract_labor_collection_entries(text):
             
             # Try alternative formats as a last resort
             alt_patterns = [
-                r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes',
-                r'(S[O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d+)\s+[Hh]ours?.*?(\d+)\s+[Mm]inutes'
+                r'([$S][O0$][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes',
+                r'([$S][O0$][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d+)\s+[Hh]ours?.*?(\d+)\s+[Mm]inutes'
             ]
             
             alt_match = None
@@ -286,7 +300,8 @@ def extract_table_structure(text):
     
     # Find table data using column-based approach
     # Look for lines that contain all the key elements: Order number, dates, times, hours
-    order_pattern = r'(S[O0][\dO0]{2}[-.\s]*[\dO0]{5}[-.\s]*[\dO0]{5})'
+    # Handle common OCR errors: $ instead of S, O vs 0, etc.
+    order_pattern = r'([$S][O0$][\dO0]{2}[-.\s]*[\dO0]{5}[-.\s]*[\dO0]{5})'
     date_pattern = r'(\d{1,2}/\d{1,2}/\d{4})'
     time_pattern = r'(\d{1,2}:\d{2}(?::\d{2})?\s*[APap][Mm])'
     hours_pattern = r'(\d+)\s*[Hh]ours?\s*(\d+)\s*[Mm]inutes?'
@@ -308,9 +323,10 @@ def extract_table_structure(text):
             
             try:
                 order_number = order_match.group(1).strip()
-                # Clean up order number (replace O with 0, remove extra spaces/dots)
+                # Clean up order number (replace common OCR errors)
                 order_number = re.sub(r'[^A-Z0-9\-]', '', order_number.upper())
-                order_number = order_number.replace('O', '0')  # Common OCR error
+                order_number = order_number.replace('$', 'S')  # $ often read as S
+                order_number = order_number.replace('O', '0')  # O often read as 0
                 
                 start_date = dates[0]
                 end_date = dates[1] if len(dates) > 1 else dates[0]

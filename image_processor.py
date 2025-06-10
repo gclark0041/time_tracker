@@ -487,9 +487,17 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                 
             entries = []
             
+            # Auto-detect if this is a labor collection report regardless of format_type
+            is_labor_collection = False
+            if ('dear' in text.lower() and 'labor collection' in text.lower()) or \
+               ('order number' in text.lower() and 'labor type' in text.lower() and 'start time' in text.lower()):
+                is_labor_collection = True
+                print("🔍 Auto-detected LABOR COLLECTION format based on content!")
+            
             # Try specialized parsers first if available
             if specialized_parsers_available:
-                if format_type == 'labor_collection' or format_type == 'generic':
+                # Always try labor collection first if content matches, regardless of format_type
+                if is_labor_collection or format_type == 'labor_collection' or format_type == 'generic':
                     print("Trying labor collection report format...")
                     entries = extract_labor_collection_entries(text)
                     if entries:
@@ -497,7 +505,8 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                         print(f"Successfully extracted {len(entries)} entries using labor collection format")
                         return entries
                         
-                if format_type == 'punch_clocks' or format_type == 'generic' or format_type == 'standard':
+                # Try punch clocks if not labor collection or if specifically requested
+                if not is_labor_collection and (format_type == 'punch_clocks' or format_type == 'generic' or format_type == 'standard'):
                     print("Trying punch clocks app format...")
                     entries = extract_punch_clocks_entries(text)
                     if entries:
