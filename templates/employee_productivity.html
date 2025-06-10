@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-user-clock me-2"></i> Employee Productivity</h1>
+            <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Reports
+            </a>
+        </div>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Filter Options</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('employee_productivity_report') }}" method="get" class="row g-3">
+                    <div class="col-md-5">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" 
+                               value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-5">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date"
+                               value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-1"></i> Apply
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if graphJSON1 %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Total Hours by Employee</h4>
+            </div>
+            <div class="card-body">
+                <div id="chart1" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Average Time per Order</h4>
+            </div>
+            <div class="card-body">
+                <div id="chart2" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4>Employee Data</h4>
+                    <a href="{{ url_for('export_data', start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', '')) }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-download me-1"></i> Export to Excel
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if employee_data %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Total Hours</th>
+                                <th>Orders Completed</th>
+                                <th>Average Time per Order (hours)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employee_data %}
+                            <tr>
+                                <td>{{ employee.employee_name }}</td>
+                                <td>{{ employee.total_hours }}</td>
+                                <td>{{ employee.order_count }}</td>
+                                <td>{{ employee.avg_time_per_order }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No employee data found for the selected date range.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if graphJSON1 %}
+<script>
+    // Create visualizations
+    const graphData1 = {{ graphJSON1 | safe }};
+    const graphData2 = {{ graphJSON2 | safe }};
+    
+    Plotly.newPlot('chart1', graphData1.data, graphData1.layout);
+    Plotly.newPlot('chart2', graphData2.data, graphData2.layout);
+</script>
+{% endif %}
+{% endblock %}

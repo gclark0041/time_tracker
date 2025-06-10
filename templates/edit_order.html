@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-edit me-2"></i> Edit Time Entry</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('edit_order', order_id=order.id) }}">
+                    <!-- Entry Type Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Entry Type</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="entry_type" id="type_service_order" value="service_order" 
+                                  {% if order.entry_type == 'service_order' %}checked{% endif %}>
+                            <label class="form-check-label" for="type_service_order">
+                                Service Order
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="entry_type" id="type_other_time" value="other_time"
+                                  {% if order.entry_type == 'other_time' %}checked{% endif %}>
+                            <label class="form-check-label" for="type_other_time">
+                                Other Time Type
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Order details (shown when service order) -->
+                    <div id="order_section" class="mb-3" {% if order.entry_type == 'other_time' %}style="display: none;"{% endif %}>
+                        <label for="order_number" class="form-label">Order Number</label>
+                        <input type="text" class="form-control" id="order_number" name="order_number"  
+                               value="{{ order.order_number or '' }}" pattern="^[A-Za-z0-9\-]+$">
+                        <div class="form-text">Enter the order number (letters, numbers, and hyphens only)</div>
+                    </div>
+                    
+                    <!-- Category selection (shown when other time type) -->
+                    <div id="category_section" class="mb-3" {% if order.entry_type == 'service_order' %}style="display: none;"{% endif %}>
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">Select a category</option>
+                            <option value="Vacation" {% if order.category == 'Vacation' %}selected{% endif %}>Vacation</option>
+                            <option value="Personal" {% if order.category == 'Personal' %}selected{% endif %}>Personal</option>
+                            <option value="Holiday" {% if order.category == 'Holiday' %}selected{% endif %}>Holiday</option>
+                            <option value="Shop Time" {% if order.category == 'Shop Time' %}selected{% endif %}>Shop Time</option>
+                            <option value="Training" {% if order.category == 'Training' %}selected{% endif %}>Training</option>
+                            <option value="Meeting" {% if order.category == 'Meeting' %}selected{% endif %}>Meeting</option>
+                            <option value="Other" {% if order.category == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employee_name" class="form-label">Employee Name</label>
+                        <input type="text" class="form-control" id="employee_name" name="employee_name" required
+                               value="{{ order.employee_name }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Optional notes about this time entry">{{ order.notes or '' }}</textarea>
+                    </div>
+                    
+                    <!-- Start time fields -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ order.start_time.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="start_time" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="start_time" name="start_time" 
+                                   value="{{ order.start_time.strftime('%H:%M') }}" required>
+                        </div>
+                    </div>
+                    
+                    <!-- End time fields -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="completed" name="completed" value="1"
+                               {% if order.end_time %}checked{% endif %}>
+                        <label class="form-check-label" for="completed">Entry completed</label>
+                    </div>
+                    
+                    <div id="end_time_section" class="row mb-3" {% if not order.end_time %}style="display: none;"{% endif %}>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date"
+                                   value="{% if order.end_time %}{{ order.end_time.strftime('%Y-%m-%d') }}{% endif %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_time" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="end_time" name="end_time"
+                                   value="{% if order.end_time %}{{ order.end_time.strftime('%H:%M') }}{% endif %}">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements
+        const orderSection = document.getElementById('order_section');
+        const categorySection = document.getElementById('category_section');
+        const serviceOrderRadio = document.getElementById('type_service_order');
+        const otherTimeRadio = document.getElementById('type_other_time');
+        const completedCheckbox = document.getElementById('completed');
+        const endTimeSection = document.getElementById('end_time_section');
+        
+        // Toggle between billable and non-billable sections
+        function toggleEntryType() {
+            if (serviceOrderRadio.checked) {
+                orderSection.style.display = 'block';
+                categorySection.style.display = 'none';
+            } else {
+                orderSection.style.display = 'none';
+                categorySection.style.display = 'block';
+            }
+        }
+        
+        // Set up event listeners
+        serviceOrderRadio.addEventListener('change', toggleEntryType);
+        otherTimeRadio.addEventListener('change', toggleEntryType);
+        
+        // Toggle end time section visibility
+        completedCheckbox.addEventListener('change', function() {
+            endTimeSection.style.display = this.checked ? 'flex' : 'none';
+        });
+    });
+</script>
+{% endblock %}

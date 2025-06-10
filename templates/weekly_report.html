@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-file-invoice me-2"></i> Weekly Payroll Report</h4>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-file-export me-1"></i> Export
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('export_weekly_report', start_date=start_date, end_date=end_date, employee=employee, format='excel') }}">
+                            <i class="fas fa-file-excel me-1"></i> Excel (.xlsx)
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('export_weekly_report', start_date=start_date, end_date=end_date, employee=employee, format='csv') }}">
+                            <i class="fas fa-file-csv me-1"></i> CSV
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('export_weekly_report', start_date=start_date, end_date=end_date, employee=employee, format='pdf') }}">
+                            <i class="fas fa-file-pdf me-1"></i> PDF
+                        </a></li>
+                    </ul>
+                </div>
+                <a href="#" onclick="window.print();" class="btn btn-sm btn-light me-2">
+                    <i class="fas fa-print"></i> Print Report
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="mb-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ request.args.get('start_date', start_date) }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ request.args.get('end_date', end_date) }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="employee" class="form-label">Employee</label>
+                            <select class="form-select" id="employee" name="employee">
+                                <option value="">All Employees</option>
+                                {% for emp in employees %}
+                                    <option value="{{ emp }}" {% if emp == employee %}selected{% endif %}>{{ emp }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="report-summary mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total Hours</h5>
+                                    <p class="display-4 mb-0">{{ "{:.2f}".format(total_hours) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Service Order Hours</h5>
+                                    <p class="display-4 mb-0">{{ "{:.2f}".format(service_hours) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Other Time Hours</h5>
+                                    <p class="display-4 mb-0">{{ "{:.2f}".format(other_hours) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if report_data %}
+                    {% for day, entries in report_data|dictsort %}
+                        <div class="day-section mb-4">
+                            <div class="card">
+                                <div class="card-header bg-secondary text-white d-flex justify-content-between">
+                                    <h5 class="mb-0">{{ day.strftime('%A, %B %d, %Y') }}</h5>
+                                    <span class="badge bg-light text-dark">
+                                        Daily Total: {{ "{:.2f}".format(day_totals[day]) }} hours
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Employee</th>
+                                                    <th>Type</th>
+                                                    <th>Details</th>
+                                                    <th>Start Time</th>
+                                                    <th>End Time</th>
+                                                    <th>Duration</th>
+                                                    <th>Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for entry in entries %}
+                                                    <tr>
+                                                        <td>{{ entry.employee_name }}</td>
+                                                        <td>
+                                                            {% if entry.entry_type == 'service_order' %}
+                                                                <span class="badge bg-primary">{{ entry.order_number }}</span>
+                                                            {% else %}
+                                                                <span class="badge bg-warning text-dark">{{ entry.category }}</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if entry.entry_type == 'service_order' %}
+                                                                Service Order
+                                                            {% else %}
+                                                                Other Time
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ entry.start_time.strftime('%H:%M') }}</td>
+                                                        <td>{{ entry.end_time.strftime('%H:%M') }}</td>
+                                                        <td>{{ "{:.2f}".format(entry.hours) }} hrs</td>
+                                                        <td>
+                                                            {% if entry.notes %}
+                                                                {{ entry.notes }}
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="table-secondary">
+                                                    <td colspan="5" class="text-end"><strong>Daily Total:</strong></td>
+                                                    <td><strong>{{ "{:.2f}".format(day_totals[day]) }} hrs</strong></td>
+                                                    <td></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        No entries found for the selected date range.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    @media print {
+        .btn, form, .navbar, footer {
+            display: none !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            padding: 0.5rem !important;
+        }
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        body {
+            font-size: 12pt;
+        }
+        .table {
+            font-size: 10pt;
+        }
+        .report-summary .card {
+            margin-bottom: 15px !important;
+        }
+    }
+</style>
+{% endblock %}

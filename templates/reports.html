@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h1><i class="fas fa-chart-line me-2"></i> Reports</h1>
+        <p class="lead">Generate reports and analytics about order processing times.</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h4><i class="fas fa-tasks me-2"></i> Order Processing Times</h4>
+            </div>
+            <div class="card-body">
+                <p>View processing times for all orders. Analyze how long orders take to complete.</p>
+                <form action="{{ url_for('order_times_report') }}" method="get">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h4><i class="fas fa-user-clock me-2"></i> Employee Productivity</h4>
+            </div>
+            <div class="card-body">
+                <p>Analyze employee productivity metrics, including total time worked and average processing times.</p>
+                <form action="{{ url_for('employee_productivity_report') }}" method="get">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-file-export me-2"></i> Export Data</h4>
+            </div>
+            <div class="card-body">
+                <p>Export time tracking data to Excel for further analysis.</p>
+                <form action="{{ url_for('export_data') }}" method="get">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date">
+                        </div>
+                        <div class="col-md-5">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-download me-1"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default dates (last 30 days)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Current date
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        // Format dates
+        const formatDate = date => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        // Set default dates for all date inputs
+        const startDateInputs = document.querySelectorAll('input[name="start_date"]');
+        const endDateInputs = document.querySelectorAll('input[name="end_date"]');
+        
+        startDateInputs.forEach(input => {
+            input.value = formatDate(thirtyDaysAgo);
+        });
+        
+        endDateInputs.forEach(input => {
+            input.value = formatDate(today);
+        });
+    });
+</script>
+{% endblock %}

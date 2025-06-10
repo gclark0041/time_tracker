@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i> Review Extracted Time Entries</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Please review the time entries extracted from your image. Check or uncheck entries to include them, and make any necessary corrections.
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Uploaded Image</h5>
+                            </div>
+                            <div class="card-body text-center">
+                                {% if image_path %}
+                                <img src="{{ url_for('uploaded_file', filename=image_path) }}" 
+                                     class="img-fluid" alt="Uploaded image" 
+                                     style="max-height: 500px; max-width: 100%;">
+                                {% else %}
+                                <p class="text-muted">No image available</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-7">
+                        <form method="POST">
+                            {% if entries %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Select</th>
+                                                <th>Employee</th>
+                                                <th>Order Number</th>
+                                                <th>Date</th>
+                                                <th>Hours</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in entries %}
+                                            <tr>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="selected_entries" value="{{ loop.index0 }}" id="entry_{{ loop.index0 }}" checked>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="employee_name_{{ loop.index0 }}" 
+                                                           value="{{ entry.get('employee_name', '') }}" required>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="order_number_{{ loop.index0 }}" 
+                                                           value="{{ entry.get('order_number', '') }}" required>
+                                                </td>
+                                                <td>
+                                                    <input type="date" class="form-control" name="date_{{ loop.index0 }}" 
+                                                           value="{% if entry.get('date_str') %}{{ entry.get('date_str') }}{% else %}{{ now().strftime('%Y-%m-%d') }}{% endif %}" required>
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control" name="hours_{{ loop.index0 }}" 
+                                                           value="{{ entry.get('hours', 0) }}" step="0.01" min="0" required>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control" name="entry_type_{{ loop.index0 }}">
+                                                        <option value="service_order" {% if entry.get('entry_type') == 'service_order' %}selected{% endif %}>Service Order</option>
+                                                        <option value="other_time" {% if entry.get('entry_type') == 'other_time' %}selected{% endif %}>Other Time</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-1"></i> Save Selected Entries
+                                    </button>
+                                    <a href="{{ url_for('upload_image') }}" class="btn btn-secondary ms-2">
+                                        <i class="fas fa-upload me-1"></i> Upload Different Image
+                                    </a>
+                                    <a href="{{ url_for('index') }}" class="btn btn-light ms-2">
+                                        <i class="fas fa-times me-1"></i> Cancel
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> No time entries were extracted from the image.
+                                </div>
+                                <div class="text-center">
+                                    <a href="{{ url_for('upload_image') }}" class="btn btn-primary">
+                                        <i class="fas fa-upload me-1"></i> Upload Another Image
+                                    </a>
+                                    <a href="{{ url_for('add_order') }}" class="btn btn-secondary ms-2">
+                                        <i class="fas fa-plus me-1"></i> Add Entry Manually
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add dynamic change handling for entry type selects
+        document.querySelectorAll('[id^="entry_type_"]').forEach(function(select) {
+            const index = select.id.split('_').pop();
+            const detailsInput = document.getElementById(`details_${index}`);
+            
+            if (detailsInput) {
+                select.addEventListener('change', function() {
+                    if (this.value === 'service_order') {
+                        detailsInput.placeholder = 'Order Number';
+                    } else {
+                        detailsInput.placeholder = 'Category';
+                    }
+                });
+            }
+        });
+        
+        // Add toggle all functionality
+        const toggleAllBtn = document.getElementById('toggleAll');
+        if (toggleAllBtn) {
+            toggleAllBtn.addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="confirm_"]');
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.checked = !allChecked;
+                });
+                
+                toggleAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
+            });
+        }
+    });
+</script>
+{% endblock %}

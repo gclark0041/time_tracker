@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: time-tracker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.4
+      - key: TESSERACT_PATH
+        value: /usr/bin/tesseract
+    plan: free

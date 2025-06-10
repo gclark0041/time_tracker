@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+    .upload-container {
+        border: 2px dashed #ccc;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+        background-color: #f9f9f9;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    .upload-container:hover {
+        border-color: #1a73e8;
+        background-color: #f0f7ff;
+    }
+    .preview-image {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 1rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: none;
+    }
+    .upload-icon {
+        font-size: 3rem;
+        color: #1a73e8;
+        margin-bottom: 1rem;
+    }
+    .instructions {
+        padding: 1.5rem;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    .instructions li {
+        margin-bottom: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-camera me-2"></i> Import Time Entries from Image</h4>
+            </div>
+            <div class="card-body">
+                <div class="instructions">
+                    <h5><i class="fas fa-info-circle me-2"></i> Instructions</h5>
+                    <ol>
+                        <li>Upload an image of a timesheet, screenshot, or any document with time entries.</li>
+                        <li>The system will try to extract dates, times, employee names, and hours worked.</li>
+                        <li>You'll be able to review and edit the extracted information before saving.</li>
+                        <li>For best results, ensure the image is clear and text is readable.</li>
+                    </ol>
+                </div>
+                
+                <form method="POST" action="{{ url_for('process_image') }}" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-container" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h5>Drag & Drop or Click to Upload</h5>
+                        <p class="text-muted">Supported formats: JPG, PNG</p>
+                        <input type="file" name="image_file" id="imageFile" class="form-control" accept=".jpg,.jpeg,.png" style="display:none;" onchange="this.form.submit()">
+                        <button type="button" id="browseBtn" class="btn btn-outline-primary mt-2">
+                            <i class="fas fa-folder-open me-1"></i> Browse Files
+                        </button>
+                        <img id="imagePreview" class="preview-image" alt="Image Preview">
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Tips for Best Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i> Good Image Examples</h6>
+                        <ul>
+                            <li>Clear, well-lit photos of timesheets</li>
+                            <li>Digital screenshots of time tracking apps</li>
+                            <li>Scanned documents with visible time entries</li>
+                            <li>Images with consistent formatting</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-times-circle text-danger me-2"></i> Challenging Image Examples</h6>
+                        <ul>
+                            <li>Blurry or poorly lit photos</li>
+                            <li>Handwritten entries that are difficult to read</li>
+                            <li>Images with complex backgrounds</li>
+                            <li>Very small text or unusual fonts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropZone = document.getElementById('dropZone');
+        const imageFile = document.getElementById('imageFile');
+        const browseBtn = document.getElementById('browseBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const form = document.getElementById('uploadForm');
+        
+        // Trigger file input when browse button is clicked
+        browseBtn.addEventListener('click', function() {
+            imageFile.click();
+        });
+        
+        // Show preview when file is selected
+        imageFile.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    // No need to enable submit button as form submits automatically
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Handle drag and drop events
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#1a73e8';
+            this.style.backgroundColor = '#f0f7ff';
+        });
+        
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#ccc';
+            this.style.backgroundColor = '#f9f9f9';
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#ccc';
+            this.style.backgroundColor = '#f9f9f9';
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                imageFile.files = e.dataTransfer.files;
+                
+                // Show preview first
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    
+                    // Submit form after a brief delay to show preview
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                };
+                reader.readAsDataURL(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // Also handle click on drop zone
+        dropZone.addEventListener('click', function() {
+            imageFile.click();
+        });
+    });
+</script>
+{% endblock %}

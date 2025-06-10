@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="fas fa-tasks me-2"></i> Time Tracking</h1>
+            <a href="{{ url_for('add_order') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> New Time Entry
+            </a>
+        </div>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-play me-2"></i> Active Time Entries</h4>
+                <a href="{{ url_for('add_order') }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus-circle"></i> New Entry
+                </a>
+            </div>
+            <div class="card-body">
+                {% if active_orders %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Employee</th>
+                                            <th>Started</th>
+                                            <th>Duration</th>
+                                            <th>Notes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in active_orders %}
+                                            <tr>
+                                                <td>
+                                                    {% if order.entry_type == 'service_order' %}
+                                                        <span class="badge bg-primary">{{ order.order_number }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">{{ order.category }}</span>
+                                                        <span class="badge bg-info">Other Time</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ order.employee_name }}</td>
+                                                <td>{{ order.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                                <td>{{ order.get_elapsed_time() }}</td>
+                                                <td>
+                                                    {% if order.notes %}
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                            data-bs-toggle="tooltip" data-bs-html="true"
+                                                            title="{{ order.notes }}">
+                                                            <i class="fas fa-sticky-note"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{ url_for('edit_order', order_id=order.id) }}" 
+                                                           class="btn btn-secondary">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </a>
+                                                        <button type="button" class="btn btn-success" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#completeModal{{ order.id }}">
+                                                            <i class="fas fa-check-circle"></i> Complete
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Complete Modal -->
+                                                    <div class="modal fade" id="completeModal{{ order.id }}" tabindex="-1" 
+                                                         aria-labelledby="completeModalLabel{{ order.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="completeModalLabel{{ order.id }}">
+                                                                        Complete
+                                                                        {% if order.entry_type == 'service_order' %}
+                                                                            Order {{ order.order_number }}
+                                                                        {% else %}
+                                                                            {{ order.category }} Time Entry
+                                                                        {% endif %}
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>Are you sure you want to mark this time entry as completed?</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <form action="{{ url_for('complete_order', order_id=order.id) }}" method="POST">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="fas fa-check-circle"></i> Complete Now
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No active time entries.</p>
+                        {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i> Completed Time Entries</h4>
+            </div>
+            <div class="card-body">
+                {% if completed_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Employee</th>
+                                    <th>Duration</th>
+                                    <th>Completed</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in completed_orders %}
+                                    <tr>
+                                        <td>
+                                            {% if order.entry_type == 'service_order' %}
+                                                <span class="badge bg-primary">{{ order.order_number }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">{{ order.category }}</span>
+                                                <span class="badge bg-info">Other Time</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ order.employee_name }}</td>
+                                        <td>{{ order.get_elapsed_time() }}</td>
+                                        <td>{{ order.end_time.strftime('%m/%d %H:%M') }}</td>
+                                        <td>
+                                            {% if order.notes %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    data-bs-toggle="tooltip" data-bs-html="true"
+                                                    title="{{ order.notes }}">
+                                                    <i class="fas fa-sticky-note"></i>
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('edit_order', order_id=order.id) }}" 
+                                               class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No completed time entries.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeElements = document.querySelectorAll('.order-time');
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Update every second
+        setInterval(function() {
+            timeElements.forEach(function(el) {
+                const startTime = new Date(el.dataset.start);
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000); // Difference in seconds
+                
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+                
+                el.textContent = `${hours}h ${minutes}m ${seconds}s`;
+            });
+        }, 1000);
+    });
+    // No need for initial update - handled by the DOMContentLoaded event
+</script>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-plus-circle me-2"></i> Start New Time Entry</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('add_order') }}">
+                    <!-- Time entry type selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Entry Type</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="entry_type" id="type_service_order" value="service_order" checked>
+                            <label class="form-check-label" for="type_service_order">
+                                Service Order
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="entry_type" id="type_other_time" value="other_time">
+                            <label class="form-check-label" for="type_other_time">
+                                Other Time Type
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Order details (shown when service order) -->
+                    <div id="order_section" class="mb-3">
+                        <label for="order_number" class="form-label">Order Number</label>
+                        <input type="text" class="form-control" id="order_number" name="order_number" 
+                               placeholder="e.g. S002-11105-21723" pattern="^[A-Za-z0-9\-]+$">
+                        <div class="form-text">Enter the order number (letters, numbers, and hyphens only)</div>
+                    </div>
+                    
+                    <!-- Category selection (shown when other time type) -->
+                    <div id="category_section" class="mb-3" style="display: none;">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">Select a category</option>
+                            <option value="Vacation">Vacation</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Holiday">Holiday</option>
+                            <option value="Shop Time">Shop Time</option>
+                            <option value="Training">Training</option>
+                            <option value="Meeting">Meeting</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employee_name" class="form-label">Employee Name</label>
+                        <input type="text" class="form-control" id="employee_name" name="employee_name" required
+                               placeholder="e.g. Greg Clark">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Optional notes about this time entry"></textarea>
+                    </div>
+                    
+                    <!-- Toggle for manual time entry -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="manual_time" name="manual_time" value="1">
+                        <label class="form-check-label" for="manual_time">Manually enter time</label>
+                    </div>
+                    
+                    <!-- Manual time entry section (hidden by default) -->
+                    <div id="manual_time_section" class="mb-3" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="start_time" class="form-label">Start Time</label>
+                                <input type="time" class="form-control" id="start_time" name="start_time">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="completed" name="completed" value="1">
+                                    <label class="form-check-label" for="completed">Order already completed</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="end_time_section" class="row mt-3" style="display: none;">
+                            <div class="col-md-6">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end_time" class="form-label">End Time</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit_button">
+                            <i class="fas fa-play-circle me-1"></i> Start Order
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements
+        const orderSection = document.getElementById('order_section');
+        const categorySection = document.getElementById('category_section');
+        const serviceOrderRadio = document.getElementById('type_service_order');
+        const otherTimeRadio = document.getElementById('type_other_time');
+        const manualTimeCheckbox = document.getElementById('manual_time');
+        const manualTimeSection = document.getElementById('manual_time_section');
+        const completedCheckbox = document.getElementById('completed');
+        const endTimeSection = document.getElementById('end_time_section');
+        const submitButton = document.getElementById('submit_button');
+        
+        // Set current date as default for date fields
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        
+        // Set default dates if manual entry is enabled
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        
+        if (startDateInput) startDateInput.value = formattedDate;
+        if (endDateInput) endDateInput.value = formattedDate;
+        
+        // Current time for time fields
+        const hours = String(today.getHours()).padStart(2, '0');
+        const minutes = String(today.getMinutes()).padStart(2, '0');
+        const formattedTime = `${hours}:${minutes}`;
+        
+        // Set default times
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        
+        if (startTimeInput) startTimeInput.value = formattedTime;
+        if (endTimeInput) endTimeInput.value = formattedTime;
+        
+        // Auto-focus on order number field initially
+        document.getElementById('order_number').focus();
+        
+        // Toggle between service order and other time type sections
+        function toggleEntryType() {
+            if (serviceOrderRadio.checked) {
+                orderSection.style.display = 'block';
+                categorySection.style.display = 'none';
+                submitButton.innerHTML = manualTimeCheckbox && manualTimeCheckbox.checked ? 
+                    '<i class="fas fa-save me-1"></i> Save Order' : 
+                    '<i class="fas fa-play-circle me-1"></i> Start Order';
+            } else {
+                orderSection.style.display = 'none';
+                categorySection.style.display = 'block';
+                submitButton.innerHTML = manualTimeCheckbox && manualTimeCheckbox.checked ? 
+                    '<i class="fas fa-save me-1"></i> Save Time Entry' : 
+                    '<i class="fas fa-play-circle me-1"></i> Start Time Entry';
+            }
+        }
+        
+        // Set up event listeners
+        serviceOrderRadio.addEventListener('change', toggleEntryType);
+        otherTimeRadio.addEventListener('change', toggleEntryType);
+        
+        // Toggle manual time section visibility
+        if (manualTimeCheckbox) {
+            manualTimeCheckbox.addEventListener('change', function() {
+                manualTimeSection.style.display = this.checked ? 'block' : 'none';
+                if (serviceOrderRadio.checked) {
+                    submitButton.innerHTML = this.checked ? 
+                        '<i class="fas fa-save me-1"></i> Save Order' : 
+                        '<i class="fas fa-play-circle me-1"></i> Start Order';
+                } else {
+                    submitButton.innerHTML = this.checked ? 
+                        '<i class="fas fa-save me-1"></i> Save Time Entry' : 
+                        '<i class="fas fa-play-circle me-1"></i> Start Time Entry';
+                }
+            });
+        }
+        
+        // Toggle end time section visibility
+        if (completedCheckbox) {
+            completedCheckbox.addEventListener('change', function() {
+                endTimeSection.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+    });
+</script>
+{% endblock %}

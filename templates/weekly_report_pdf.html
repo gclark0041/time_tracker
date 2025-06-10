@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker Weekly Payroll Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .report-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .summary-box {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            page-break-inside: avoid;
+        }
+        .day-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 6px;
+            font-size: 75%;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        .badge-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Weekly Payroll Report</h1>
+    </div>
+
+    <div class="report-info">
+        <h3>Report Details</h3>
+        <p><strong>Period:</strong> {{ start_date }} to {{ end_date }}</p>
+        {% if employee %}
+        <p><strong>Employee:</strong> {{ employee }}</p>
+        {% else %}
+        <p><strong>Employee:</strong> All employees</p>
+        {% endif %}
+        <p><strong>Generated on:</strong> {{ now.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+
+    <div class="summary-box">
+        <h3>Summary</h3>
+        <p><strong>Total Hours:</strong> {{ "%.2f"|format(total_hours) }}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day, total in day_totals.items() %}
+                <tr>
+                    <td>{{ day.strftime('%Y-%m-%d') }} ({{ day.strftime('%A') }})</td>
+                    <td>{{ "%.2f"|format(total) }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td>{{ "%.2f"|format(total_hours) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Detailed Report</h3>
+    {% for day, entries in report_data.items() %}
+    <div class="day-section">
+        <h4>{{ day.strftime('%Y-%m-%d') }} ({{ day.strftime('%A') }})</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Details</th>
+                    <th>Time</th>
+                    <th>Hours</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.employee_name }}</td>
+                    <td>
+                        {% if entry.entry_type == 'service_order' %}
+                        <span class="badge badge-primary">Service Order</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Other Time</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if entry.entry_type == 'service_order' %}
+                        {{ entry.order_number }}
+                        {% else %}
+                        {{ entry.category }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ entry.start_time.strftime('%H:%M') }}
+                        {% if entry.end_time %}
+                        - {{ entry.end_time.strftime('%H:%M') }}
+                        {% endif %}
+                    </td>
+                    <td>{{ "%.2f"|format(entry.hours) }}</td>
+                    <td>{{ entry.notes|default('', true) }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td colspan="4">Daily Total</td>
+                    <td>{{ "%.2f"|format(day_totals[day]) }}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% if not loop.last %}
+    <hr>
+    {% endif %}
+    {% endfor %}
+</body>
+</html>
