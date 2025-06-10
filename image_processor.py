@@ -5,10 +5,20 @@ import cv2
 import pytesseract
 import numpy as np
 import platform
+import shutil
+import sqlite3
 from PIL import Image
 import dateutil.parser
 from datetime import datetime, timedelta
 from dateutil import parser
+
+# Import specialized parsers
+try:
+    from labor_collection_parser import extract_labor_collection_entries, extract_punch_clocks_entries
+    specialized_parsers_available = True
+except ImportError:
+    specialized_parsers_available = False
+    print("Specialized parsers not available. Using basic extraction only.")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -387,19 +397,9 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                 print("Returning demo data since file not found")
                 return get_demo_entries('Missing File', format_type)
             return []
-
-        # Check if Tesseract is available
-        if not tesseract_available:
-            logger.warning("Tesseract OCR is not available. Cannot process image.")
-            print("WARNING: Tesseract OCR is not available. Using demo data instead.")
-            # Return a sample entry for demo purposes when deployed without Tesseract
-            if os.environ.get('RENDER', '') == 'true':
-                logger.info("Running on Render: returning demo data instead of OCR")
-                return get_demo_entries('No Tesseract', format_type)
-            return []
         
-        # Extract text using OCR
-        try:
+        # Extract text from image
+        if tesseract_available:
             text = extract_text_from_image(image_path)
             print(f"Extracted text length: {len(text) if text else 0} characters")
             
@@ -411,20 +411,31 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                     return get_demo_entries('No Text', format_type)
                 return []
                 
-        except Exception as e:
-            logger.error(f"Error in OCR text extraction: {str(e)}")
-            print(f"ERROR in OCR text extraction: {str(e)}")
-            if os.environ.get('RENDER', '') == 'true':
-                return get_demo_entries('OCR Error', format_type)
-            return []
-        
-        # Try to extract time entries based on format type
-        try:
-            # Choose extraction method based on format type
+            entries = []
+            
+            # Try specialized parsers first if available
+            if specialized_parsers_available:
+                if format_type == 'labor_collection' or format_type == 'generic':
+                    print("Trying labor collection report format...")
+                    entries = extract_labor_collection_entries(text)
+                    if entries:
+                        logger.info(f"Successfully extracted {len(entries)} entries using labor collection format")
+                        print(f"Successfully extracted {len(entries)} entries using labor collection format")
+                        return entries
+                        
+                if format_type == 'punch_clocks' or format_type == 'generic' or format_type == 'standard':
+                    print("Trying punch clocks app format...")
+                    entries = extract_punch_clocks_entries(text)
+                    if entries:
+                        logger.info(f"Successfully extracted {len(entries)} entries using punch clocks format")
+                        print(f"Successfully extracted {len(entries)} entries using punch clocks format")
+                        return entries
+            
+            # Fall back to original extraction methods if specialized parsers fail or are not available
             if format_type == 'generic':
                 print("Using generic format extraction method")
                 entries = extract_generic_time_entries(text)
-            else:  # default to standard
+            else:
                 print("Using standard format extraction method")
                 entries = extract_time_entries(text)
             
@@ -434,9 +445,10 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                 print(f"Successfully extracted {len(entries)} time entries using {format_type} format")
                 print(f"First entry: {entries[0]}")
                 
-                # Add format type to each entry
+                # Add format type to each entry if not already set
                 for entry in entries:
-                    entry['format_type'] = format_type
+                    if 'format_type' not in entry:
+                        entry['format_type'] = format_type
                     
                 return entries
             else:
@@ -452,21 +464,21 @@ def parse_image_for_time_entries(image_path, format_type='standard'):
                         print(f"Fallback successful: extracted {len(fallback_entries)} entries using generic format")
                         # Add format type to each entry
                         for entry in fallback_entries:
-                            entry['format_type'] = 'generic (fallback)'
+                            if 'format_type' not in entry:
+                                entry['format_type'] = 'generic (fallback)'
                         return fallback_entries
                 
                 # Return demo data in production if no entries extracted
                 if os.environ.get('RENDER', '') == 'true':
                     return get_demo_entries('No Entries', format_type)
                 return []
-                
-        except Exception as e:
-            logger.error(f"Error extracting time entries with {format_type} format: {str(e)}")
-            print(f"ERROR extracting time entries with {format_type} format: {str(e)}")
+        else:
+            logger.error("Tesseract OCR not available")
+            print("ERROR: Tesseract OCR not available")
             if os.environ.get('RENDER', '') == 'true':
-                return get_demo_entries('Parse Error', format_type)
+                return get_demo_entries('OCR Unavailable', format_type)
             return []
-            
+                
     except Exception as e:
         logger.error(f"Unexpected error in parse_image_for_time_entries: {str(e)}")
         print(f"UNEXPECTED ERROR in parse_image_for_time_entries: {str(e)}")
