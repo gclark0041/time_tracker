@@ -16,6 +16,9 @@ def extract_labor_collection_entries(text):
     """
     if not text:
         return []
+    
+    # Print the first 100 characters of the text for debugging
+    print(f"OCR TEXT SAMPLE: {text[:100]}...")
         
     entries = []
     lines = text.split('\n')
@@ -23,20 +26,46 @@ def extract_labor_collection_entries(text):
     # Extract employee name from greeting (e.g., "Dear Greg Clark")
     employee_name = "Current User"  # Default name
     for i, line in enumerate(lines[:10]):  # Check first 10 lines
-        name_match = re.search(r'Dear\s+([A-Za-z]+\s+[A-Za-z]+)', line)
-        if name_match:
-            employee_name = name_match.group(1)
-            print(f"Found employee name: {employee_name}")
+        # More flexible name patterns
+        name_patterns = [
+            r'Dear\s+([A-Za-z]+\s+[A-Za-z]+)',  # "Dear Greg Clark"
+            r'Dear ([A-Za-z\.]+\s+[A-Za-z\.]+)',  # With possible periods
+            r'[Dd][Ee][Aa][Rr]\s+([A-Za-z]+\s+[A-Za-z]+)', # Case insensitive
+            r'To:\s*([A-Za-z]+\s+[A-Za-z]+)'  # "To: Greg Clark"
+        ]
+        
+        for pattern in name_patterns:
+            name_match = re.search(pattern, line)
+            if name_match:
+                employee_name = name_match.group(1)
+                print(f"Found employee name: {employee_name} using pattern: {pattern}")
+                break
+        
+        # If name found, break the outer loop too
+        if employee_name != "Current User":
             break
             
-    # Look for the table header that indicates a Labor Collection report
-    header_pattern = r'Order\s+Number\s+Labor\s+Type\s+Start\s+Time\s+End\s+Time\s+Hours'
+    print(f"Using employee name: {employee_name}")
+            
+    # Look for the table header that indicates a Labor Collection report - multiple patterns for OCR variations
+    header_patterns = [
+        r'Order\s+Number\s+Labor\s+Type\s+Start\s+Time\s+End\s+Time\s+Hours',
+        r'[Oo]rder\s+[Nn]umber\s+[Ll]abor\s+[Tt]ype\s+[Ss]tart\s+[Tt]ime\s+[Ee]nd\s+[Tt]ime\s+[Hh]ours',
+        r'Order.?Number.?Labor.?Type.?Start.?Time.?End.?Time.?Hours'
+    ]
     header_found = False
     
     for i, line in enumerate(lines):
-        if re.search(header_pattern, line, re.IGNORECASE):
-            header_found = True
-            print(f"Found Labor Collection report header at line {i}: {line}")
+        for header_pattern in header_patterns:
+            if re.search(header_pattern, line, re.IGNORECASE):
+                header_found = True
+                print(f"Found Labor Collection report header at line {i}: {line}")
+                print(f"Matched pattern: {header_pattern}")
+                break
+        
+        if header_found:
+            # Save this as the header line index for later
+            header_line_index = i
             continue
             
         if not header_found:
@@ -46,11 +75,29 @@ def extract_labor_collection_entries(text):
         if 'Total Hours' in line or not line.strip():
             continue
             
-        # Pattern for labor collection entries
-        # Order Number, Labor Type, Start Time, End Time, Hours
-        entry_pattern = r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes'
-        entry_match = re.search(entry_pattern, line)
+        # Print the line for debugging
+        print(f"Processing line {i}: {line[:50]}{'...' if len(line) > 50 else ''}")
         
+        # Multiple patterns for labor collection entries with variations for OCR errors
+        # Order Number, Labor Type, Start Time, End Time, Hours
+        entry_patterns = [
+            r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2})\s+(\d+)\s+Hours\s+(\d+)\s+Minutes',
+            r'(S[O0][\dO0]{2}.?[\dO0]{5}.?[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+).?Hours.?(\d+).?Minutes',
+            # Very loose pattern
+            r'(S[O0]\S+)\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d{1,2}/\d{1,2}/\d{4}.+?(?:AM|PM))\s+(\d+)\s+H\w+\s+(\d+)\s+M\w+'
+        ]
+        # Try each pattern until we find a match
+        entry_match = None
+        matched_pattern = None
+        
+        for idx, pattern in enumerate(entry_patterns):
+            match = re.search(pattern, line)
+            if match:
+                entry_match = match
+                matched_pattern = pattern
+                print(f"Matched entry pattern #{idx+1}")
+                break
+                
         if entry_match:
             try:
                 order_number = entry_match.group(1).strip()
@@ -87,9 +134,71 @@ def extract_labor_collection_entries(text):
                 print(f"Error parsing labor collection entry: {e} in line: {line}")
                 
         else:
-            # Try alternative format with different spacing
-            alt_pattern = r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes'
-            alt_match = re.search(alt_pattern, line)
+            # If we still have no matches, try direct parsing
+            if header_found and i > header_line_index and 'SO' in line and ('AM' in line or 'PM' in line):
+                print("Attempting direct parsing of line containing order number and times")
+                
+                # Try to extract order number directly
+                order_match = re.search(r'(S[O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5})', line)
+                
+                # Try to extract times directly
+                time_matches = re.findall(r'(\d{1,2}/\d{1,2}/\d{4}[^\d]+?\d{1,2}:\d{2}:\d{2}\s*[APM]{2})', line)
+                
+                # Try to extract hours directly
+                hours_match = re.search(r'(\d+)\s*[Hh]ours?\s+(\d+)\s*[Mm]inutes?', line)
+                
+                if order_match and len(time_matches) >= 2 and hours_match:
+                    print("Direct parsing succeeded!")
+                    try:
+                        # Create a manual match object
+                        order_number = order_match.group(1)
+                        start_time_str = time_matches[0]
+                        end_time_str = time_matches[1]
+                        hours = int(hours_match.group(1))
+                        minutes = int(hours_match.group(2))
+                        
+                        # Parse times
+                        start_time = parser.parse(start_time_str)
+                        end_time = parser.parse(end_time_str)
+                        
+                        # Calculate decimal hours
+                        decimal_hours = hours + (minutes / 60)
+                        
+                        entry = {
+                            'order_number': order_number,
+                            'labor_type': 'RegularTime',  # Default
+                            'start_time': start_time_str,
+                            'end_time': end_time_str,
+                            'date': start_time.date(),
+                            'date_str': start_time.date().strftime('%Y-%m-%d'),
+                            'hours': round(decimal_hours, 2),
+                            'entry_type': 'service_order',
+                            'employee_name': employee_name,
+                            'format_type': 'labor_collection'
+                        }
+                        
+                        entries.append(entry)
+                        print(f"Added entry through direct parsing: {entry}")
+                        continue
+                    except Exception as e:
+                        print(f"Error in direct parsing: {str(e)}")
+            
+            # Try alternative formats as a last resort
+            alt_patterns = [
+                r'(S[O0][\dO0]{2}-[\dO0]{5}-[\dO0]{5})\s+([\w\s]+)\s+(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[APM]{2}).*?(\d+)\s+Hours\s+(\d+)\s+Minutes',
+                r'(S[O0][\dO0]{2}[\-\.][\dO0]{5}[\-\.][\dO0]{5}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d+)\s+[Hh]ours?.*?(\d+)\s+[Mm]inutes'
+            ]
+            
+            alt_match = None
+            matched_alt_pattern = None
+            
+            for idx, pattern in enumerate(alt_patterns):
+                match = re.search(pattern, line)
+                if match:
+                    alt_match = match
+                    matched_alt_pattern = pattern
+                    print(f"Matched alternative pattern #{idx+1}")
+                    break
             
             if alt_match:
                 try:
