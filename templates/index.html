@@ -11,6 +11,40 @@
 {% endblock %}
 
 {% block content %}
+<!-- Quick Actions Bar - Moved to Top -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card quick-actions-card">
+            <div class="card-body py-3">
+                <div class="quick-actions-container">
+                    <div class="quick-actions d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary btn-enhanced" onclick="startQuickTimer('service_order')">
+                            <i class="fas fa-tools me-1"></i> Service Order
+                        </button>
+                        <button class="btn btn-info btn-enhanced" onclick="startQuickTimer('break')">
+                            <i class="fas fa-coffee me-1"></i> Break
+                        </button>
+                        <button class="btn btn-warning btn-enhanced" onclick="startQuickTimer('meeting')">
+                            <i class="fas fa-users me-1"></i> Meeting
+                        </button>
+                        <button class="btn btn-success btn-enhanced" onclick="startQuickTimer('training')">
+                            <i class="fas fa-graduation-cap me-1"></i> Training
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-outline-secondary" onclick="toggleSidebar()">
+                            <i class="fas fa-bars me-1"></i> Menu
+                        </button>
+                        <a href="{{ url_for('add_order') }}" class="btn btn-primary btn-enhanced">
+                            <i class="fas fa-plus me-1"></i> New Entry
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Enhanced Sidebar Navigation -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -220,39 +254,7 @@
     </div>
 </div>
 
-<!-- Quick Actions Bar -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body py-3">
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <div class="quick-actions d-flex flex-wrap gap-2">
-                        <button class="btn btn-primary btn-enhanced" onclick="startQuickTimer('service_order')">
-                            <i class="fas fa-tools me-1"></i> Service Order
-                        </button>
-                        <button class="btn btn-info btn-enhanced" onclick="startQuickTimer('break')">
-                            <i class="fas fa-coffee me-1"></i> Break
-                        </button>
-                        <button class="btn btn-warning btn-enhanced" onclick="startQuickTimer('meeting')">
-                            <i class="fas fa-users me-1"></i> Meeting
-                        </button>
-                        <button class="btn btn-success btn-enhanced" onclick="startQuickTimer('training')">
-                            <i class="fas fa-graduation-cap me-1"></i> Training
-                        </button>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-outline-secondary" onclick="toggleSidebar()">
-                            <i class="fas fa-bars me-1"></i> Menu
-                        </button>
-                        <a href="{{ url_for('add_order') }}" class="btn btn-primary btn-enhanced">
-                            <i class="fas fa-plus me-1"></i> New Entry
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Main Content Row -->
 <div class="row">
