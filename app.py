@@ -1661,12 +1661,26 @@ def api_dashboard_stats():
     week_start = today - timedelta(days=today.weekday())
     
     # Get today's hours for current user
-    today_orders = Order.query.filter(
-        Order.start_time >= datetime.combine(today, datetime.min.time()),
-        Order.start_time < datetime.combine(today + timedelta(days=1), datetime.min.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    # Try multiple matching strategies for employee name
+    name_filters = []
+    if current_user.get_full_name() and current_user.get_full_name() != current_user.username:
+        name_filters.append(Order.employee_name == current_user.get_full_name())
+    name_filters.append(Order.employee_name == current_user.username)
+    
+    # If admin, show all orders, otherwise filter by user
+    if current_user.is_admin:
+        today_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(today, datetime.min.time()),
+            Order.start_time < datetime.combine(today + timedelta(days=1), datetime.min.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        today_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(today, datetime.min.time()),
+            Order.start_time < datetime.combine(today + timedelta(days=1), datetime.min.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     today_hours = 0
     for order in today_orders:
@@ -1675,11 +1689,18 @@ def api_dashboard_stats():
             today_hours += duration.total_seconds() / 3600
     
     # Get week's hours for current user
-    week_orders = Order.query.filter(
-        Order.start_time >= datetime.combine(week_start, datetime.min.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    # Get this week's hours for current user
+    if current_user.is_admin:
+        week_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(week_start, datetime.min.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        week_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(week_start, datetime.min.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     week_hours = 0
     for order in week_orders:
@@ -1688,12 +1709,19 @@ def api_dashboard_stats():
             week_hours += duration.total_seconds() / 3600
     
     # Calculate trends (compare with previous periods)
-    yesterday_orders = Order.query.filter(
-        Order.start_time >= datetime.combine(today - timedelta(days=1), datetime.min.time()),
-        Order.start_time < datetime.combine(today, datetime.min.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    if current_user.is_admin:
+        yesterday_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(today - timedelta(days=1), datetime.min.time()),
+            Order.start_time < datetime.combine(today, datetime.min.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        yesterday_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(today - timedelta(days=1), datetime.min.time()),
+            Order.start_time < datetime.combine(today, datetime.min.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     yesterday_hours = 0
     for order in yesterday_orders:
@@ -1702,12 +1730,19 @@ def api_dashboard_stats():
             yesterday_hours += duration.total_seconds() / 3600
     
     prev_week_start = week_start - timedelta(days=7)
-    prev_week_orders = Order.query.filter(
-        Order.start_time >= datetime.combine(prev_week_start, datetime.min.time()),
-        Order.start_time < datetime.combine(week_start, datetime.min.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    if current_user.is_admin:
+        prev_week_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(prev_week_start, datetime.min.time()),
+            Order.start_time < datetime.combine(week_start, datetime.min.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        prev_week_orders = Order.query.filter(
+            Order.start_time >= datetime.combine(prev_week_start, datetime.min.time()),
+            Order.start_time < datetime.combine(week_start, datetime.min.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     prev_week_hours = 0
     for order in prev_week_orders:
@@ -1747,12 +1782,26 @@ def api_calendar_heatmap():
     start_date = end_date - timedelta(days=365)  # Last year
     
     # Get all completed orders in the date range for current user
-    orders = Order.query.filter(
-        Order.start_time >= datetime.combine(start_date, datetime.min.time()),
-        Order.start_time <= datetime.combine(end_date, datetime.max.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    # Try multiple matching strategies for employee name
+    name_filters = []
+    if current_user.get_full_name() and current_user.get_full_name() != current_user.username:
+        name_filters.append(Order.employee_name == current_user.get_full_name())
+    name_filters.append(Order.employee_name == current_user.username)
+    
+    # If admin, show all orders, otherwise filter by user
+    if current_user.is_admin:
+        orders = Order.query.filter(
+            Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+            Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        orders = Order.query.filter(
+            Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+            Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     # Group by date and calculate hours
     daily_hours = defaultdict(float)
@@ -1796,12 +1845,26 @@ def api_time_trends():
     start_date = end_date - timedelta(days=days)
     
     # Get orders in date range for current user
-    orders = Order.query.filter(
-        Order.start_time >= datetime.combine(start_date, datetime.min.time()),
-        Order.start_time <= datetime.combine(end_date, datetime.max.time()),
-        Order.end_time.isnot(None),
-        Order.employee_name == current_user.get_full_name()
-    ).all()
+    # Try multiple matching strategies for employee name
+    name_filters = []
+    if current_user.get_full_name() and current_user.get_full_name() != current_user.username:
+        name_filters.append(Order.employee_name == current_user.get_full_name())
+    name_filters.append(Order.employee_name == current_user.username)
+    
+    # If admin, show all orders, otherwise filter by user
+    if current_user.is_admin:
+        orders = Order.query.filter(
+            Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+            Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+            Order.end_time.isnot(None)
+        ).all()
+    else:
+        orders = Order.query.filter(
+            Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+            Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+            Order.end_time.isnot(None),
+            db.or_(*name_filters)
+        ).all()
     
     # Group by date and category
     daily_data = defaultdict(lambda: defaultdict(float))
