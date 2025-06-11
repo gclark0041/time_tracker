@@ -1,96 +1,347 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Time Tracker</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Time Tracker">
+    <link rel="apple-touch-icon" href="/static/img/icon-192x192.png">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --warning-color: #f59e0b;
+            --warning-hover: #d97706;
+            --info-color: #06b6d4;
+            --info-hover: #0891b2;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        [data-bs-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
             padding-bottom: 2rem;
+            transition: all 0.3s ease;
         }
+
         .navbar {
-            background-color: #1a73e8;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+
         .navbar-brand {
-            font-weight: bold;
+            font-weight: 700;
             font-size: 1.5rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+
         .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
             margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
             border: none;
         }
-        .card-header {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            border-bottom: 1px solid #eaeaea;
-        }
-        .btn-primary {
-            background-color: #1a73e8;
-            border-color: #1a73e8;
-        }
-        .btn-primary:hover {
-            background-color: #0d62d0;
-            border-color: #0d62d0;
-        }
+
         .btn-success {
-            background-color: #34a853;
-            border-color: #34a853;
+            background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+            border: none;
         }
-        .btn-success:hover {
-            background-color: #2d9249;
-            border-color: #2d9249;
-        }
+
         .btn-danger {
-            background-color: #ea4335;
-            border-color: #ea4335;
+            background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-hover) 100%);
+            border: none;
         }
-        .btn-danger:hover {
-            background-color: #d33426;
-            border-color: #d33426;
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-hover) 100%);
+            border: none;
         }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color) 0%, var(--info-hover) 100%);
+            border: none;
+        }
+
         .alert {
-            border-radius: 8px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--shadow-sm);
         }
+
         .order-card {
-            transition: transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid var(--primary-color);
         }
+
         .order-card:hover {
-            transform: translateY(-2px);
+            transform: translateX(4px);
+            border-left-color: var(--success-color);
         }
+
         .order-time {
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--primary-color);
         }
+
         .active-indicator {
-            color: #34a853;
+            color: var(--success-color);
             animation: pulse 2s infinite;
         }
+
         @keyframes pulse {
-            0% { opacity: 0.7; }
+            0%, 100% { opacity: 0.7; }
             50% { opacity: 1; }
-            100% { opacity: 0.7; }
         }
-        .clock-icon {
-            font-size: 1.2rem;
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
             margin-right: 0.5rem;
         }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+
+        .status-active { background-color: var(--success-color); }
+        .status-paused { background-color: var(--warning-color); }
+        .status-completed { background-color: var(--text-secondary); }
+
+        .progress-ring {
+            width: 40px;
             height: 40px;
-            line-height: 40px;
-            background-color: #f5f5f5;
-            text-align: center;
+        }
+
+        .progress-ring__circle {
+            stroke: var(--primary-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .floating-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: white;
+            border-radius: 50px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .floating-timer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .table {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5em 0.75em;
+            border-radius: 8px;
+        }
+
+        .mobile-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1040;
+        }
+
+        .mobile-fab .btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Touch-friendly mobile improvements */
+        @media (max-width: 768px) {
+            .btn {
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+            
+            .table-responsive {
+                border-radius: 12px;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Swipe actions for mobile */
+        .swipe-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swipe-actions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, var(--success-color), var(--danger-color));
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .swipe-container.swiped .swipe-actions {
+            transform: translateX(0);
+        }
+
+        /* Loading animations */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced form controls */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        /* Quick action buttons */
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -109,7 +360,7 @@
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i> Home
+                            <i class="fas fa-home me-1"></i> Dashboard
                         </a>
                     </li>
                     {% if current_user.is_admin %}
@@ -131,7 +382,7 @@
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('add_order') %}active{% endif %}" href="{{ url_for('add_order') }}">
-                            <i class="fas fa-plus me-1"></i> New Order
+                            <i class="fas fa-plus me-1"></i> New Entry
                         </a>
                     </li>
                     <li class="nav-item">
@@ -141,17 +392,22 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/weekly_report' in request.path %}active{% endif %}" href="{{ url_for('weekly_report') }}">
-                            <i class="fas fa-file-invoice-dollar me-1"></i> Payroll Report
+                            <i class="fas fa-file-invoice-dollar me-1"></i> Payroll
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/upload_image' in request.path %}active{% endif %}" href="{{ url_for('upload_image') }}">
-                            <i class="fas fa-camera me-1"></i> Import from Image
+                            <i class="fas fa-camera me-1"></i> Import Image
                         </a>
                     </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                            <i class="fas fa-moon" id="theme-icon"></i>
+                        </button>
+                    </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,6 +441,7 @@
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -195,14 +452,262 @@
         {% block content %}{% endblock %}
     </div>
 
-    <div class="footer">
-        <div class="container">
-            <span class="text-muted">Time Tracker &copy; {{ now.year }}</span>
-        </div>
+    <!-- Floating Timer Widget -->
+    {% if current_user.is_authenticated %}
+    <div class="floating-timer d-none" id="floatingTimer" onclick="showActiveTimers()">
+        <i class="fas fa-clock me-2"></i>
+        <span id="activeTimerCount">0</span> active
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
+    <!-- Mobile FAB -->
+    <div class="mobile-fab d-md-none">
+        <a href="{{ url_for('add_order') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Theme management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            const currentTheme = html.getAttribute('data-bs-theme');
+            
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            html.setAttribute('data-bs-theme', savedTheme);
+            icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Update floating timer
+            updateFloatingTimer();
+            
+            // Update timers every second
+            setInterval(updateFloatingTimer, 1000);
+        });
+
+        // Floating timer functionality
+        function updateFloatingTimer() {
+            const activeElements = document.querySelectorAll('.active-indicator');
+            const floatingTimer = document.getElementById('floatingTimer');
+            const activeCount = document.getElementById('activeTimerCount');
+            
+            if (activeElements.length > 0) {
+                activeCount.textContent = activeElements.length;
+                floatingTimer.classList.remove('d-none');
+            } else {
+                floatingTimer.classList.add('d-none');
+            }
+        }
+
+        function showActiveTimers() {
+            // Scroll to active timers section
+            const activeSection = document.querySelector('.card-header:contains("Active")');
+            if (activeSection) {
+                activeSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Touch/swipe functionality for mobile
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        document.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            const target = e.target.closest('tr');
+            
+            if (Math.abs(diffX) > 50 && target) {
+                // Implement swipe actions here
+                if (diffX > 0) {
+                    // Swipe left - complete action
+                    target.querySelector('.btn-success')?.click();
+                } else {
+                    // Swipe right - edit action
+                    target.querySelector('.btn-secondary')?.click();
+                }
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N for new entry
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = "{{ url_for('add_order') }}";
+            }
+            
+            // Ctrl/Cmd + R for reports
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                window.location.href = "{{ url_for('reports') }}";
+            }
+            
+            // Ctrl/Cmd + D for dashboard
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                window.location.href = "{{ url_for('index') }}";
+            }
+        });
+
+        // Auto-refresh functionality
+        function enableAutoRefresh() {
+            setInterval(function() {
+                // Only refresh if user is on dashboard
+                if (window.location.pathname === "{{ url_for('index') }}") {
+                    // Update time displays without full page refresh
+                    updateTimerDisplays();
+                }
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        function updateTimerDisplays() {
+            const timeElements = document.querySelectorAll('.order-time[data-start]');
+            timeElements.forEach(function(el) {
+                const startTime = new Date(el.dataset.start);
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                
+                el.textContent = `${hours}h ${minutes}m`;
+            });
+        }
+
+        // Enable auto-refresh if on dashboard
+        if (window.location.pathname === "{{ url_for('index') }}") {
+            enableAutoRefresh();
+        }
+        
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // Show update notification
+                                    showUpdateNotification();
+                                }
+                            });
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+        
+        // PWA Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+        
+        function showInstallButton() {
+            // Create install button if not exists
+            if (!document.getElementById('install-btn')) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'install-btn';
+                installBtn.className = 'btn btn-primary btn-sm position-fixed';
+                installBtn.style.cssText = 'bottom: 80px; left: 20px; z-index: 1050;';
+                installBtn.innerHTML = '<i class="fas fa-download me-1"></i> Install App';
+                installBtn.onclick = installApp;
+                document.body.appendChild(installBtn);
+            }
+        }
+        
+        function installApp() {
+            const installBtn = document.getElementById('install-btn');
+            if (deferredPrompt && installBtn) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        installBtn.remove();
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        function showUpdateNotification() {
+            const updateAlert = document.createElement('div');
+            updateAlert.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            updateAlert.style.cssText = 'top: 20px; right: 20px; z-index: 1060; width: 300px;';
+            updateAlert.innerHTML = `
+                <i class="fas fa-sync-alt me-2"></i>
+                <strong>Update Available!</strong><br>
+                A new version is ready.
+                <button type="button" class="btn btn-sm btn-primary mt-2 w-100" onclick="updateApp()">
+                    Update Now
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(updateAlert);
+        }
+        
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration && registration.waiting) {
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+        
+        // Make functions globally available
+        window.installApp = installApp;
+        window.updateApp = updateApp;
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>
