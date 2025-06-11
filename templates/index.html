@@ -11,39 +11,112 @@
 {% endblock %}
 
 {% block content %}
-<!-- Sidebar Navigation -->
+<!-- Enhanced Sidebar Navigation -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h5 class="mb-0">Quick Navigation</h5>
-        <button class="btn btn-sm btn-outline-secondary" onclick="closeSidebar()">
+        <h5 class="mb-0">
+            <i class="fas fa-clock"></i>
+            Time Tracker
+        </h5>
+        <button class="sidebar-close-btn" onclick="closeSidebar()">
             <i class="fas fa-times"></i>
         </button>
     </div>
+    
     <nav class="sidebar-nav">
-        <a href="{{ url_for('index') }}" class="sidebar-nav-item active">
-            <i class="fas fa-tachometer-alt"></i> Dashboard
-        </a>
-        <a href="{{ url_for('add_order') }}" class="sidebar-nav-item">
-            <i class="fas fa-plus-circle"></i> New Entry
-        </a>
-        <a href="{{ url_for('upload_image') }}" class="sidebar-nav-item">
-            <i class="fas fa-camera"></i> Import Image
-        </a>
-        <a href="{{ url_for('reports') }}" class="sidebar-nav-item">
-            <i class="fas fa-chart-line"></i> Reports
-        </a>
-        <a href="{{ url_for('weekly_report') }}" class="sidebar-nav-item">
-            <i class="fas fa-file-invoice-dollar"></i> Payroll
-        </a>
+        <!-- Main Navigation -->
+        <div class="sidebar-nav-section">
+            <div class="sidebar-nav-section-title">Main Navigation</div>
+            <a href="{{ url_for('index') }}" class="sidebar-nav-item {% if request.path == url_for('index') %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{{ url_for('add_order') }}" class="sidebar-nav-item {% if request.path == url_for('add_order') %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> New Entry
+            </a>
+            <a href="{{ url_for('upload_image') }}" class="sidebar-nav-item {% if '/upload_image' in request.path %}active{% endif %}">
+                <i class="fas fa-camera"></i> Import from Image
+            </a>
+        </div>
+
+        <!-- Reports Section -->
+        <div class="sidebar-nav-section">
+            <div class="sidebar-nav-section-title">Reports & Analytics</div>
+            <a href="{{ url_for('reports') }}" class="sidebar-nav-item {% if '/reports' in request.path %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> Analytics
+            </a>
+            <a href="{{ url_for('weekly_report') }}" class="sidebar-nav-item {% if '/weekly_report' in request.path %}active{% endif %}">
+                <i class="fas fa-file-invoice-dollar"></i> Payroll Report
+            </a>
+            <a href="{{ url_for('export_data') }}" class="sidebar-nav-item">
+                <i class="fas fa-download"></i> Export Data
+            </a>
+        </div>
+
+        <!-- Admin Section -->
         {% if current_user.is_admin %}
-        <a href="{{ url_for('admin_user_management') }}" class="sidebar-nav-item">
-            <i class="fas fa-users-cog"></i> User Management
-        </a>
-        <a href="{{ url_for('admin_settings') }}" class="sidebar-nav-item">
-            <i class="fas fa-cogs"></i> Settings
-        </a>
+        <div class="sidebar-nav-section">
+            <div class="sidebar-nav-section-title">Administration</div>
+            <a href="{{ url_for('admin_user_management') }}" class="sidebar-nav-item {% if '/admin/' in request.path %}active{% endif %}">
+                <i class="fas fa-users-cog"></i> User Management
+            </a>
+            <a href="{{ url_for('admin_settings') }}" class="sidebar-nav-item">
+                <i class="fas fa-cogs"></i> Settings
+            </a>
+        </div>
+        {% elif current_user.is_manager %}
+        <div class="sidebar-nav-section">
+            <div class="sidebar-nav-section-title">Team Management</div>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-users"></i> My Team
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-chart-pie"></i> Team Reports
+            </a>
+        </div>
         {% endif %}
+
+        <!-- User Section -->
+        <div class="sidebar-nav-section">
+            <div class="sidebar-nav-section-title">Account</div>
+            <a href="{{ url_for('account_settings') }}" class="sidebar-nav-item">
+                <i class="fas fa-user-cog"></i> Account Settings
+            </a>
+            <a href="#" class="sidebar-nav-item" onclick="showHelp()">
+                <i class="fas fa-question-circle"></i> Help & Support
+            </a>
+        </div>
     </nav>
+
+    <!-- Theme Toggle Section -->
+    <div class="sidebar-theme-toggle">
+        <div class="theme-toggle-content">
+            <div>
+                <div class="fw-semibold">Dark Mode</div>
+                <small class="text-muted">Toggle appearance</small>
+            </div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="sidebarThemeToggle">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- User Info Section -->
+    <div class="sidebar-nav-section sidebar-user-section">
+        <div class="sidebar-user-info">
+            <div class="d-flex align-items-center">
+                <div class="sidebar-user-avatar">
+                    {{ current_user.username[0].upper() }}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ current_user.get_full_name() or current_user.username }}</div>
+                    <small class="text-muted">{{ current_user.email }}</small>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="sidebar-nav-item">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
@@ -51,11 +124,11 @@
 <div class="row mb-4">
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="dashboard-card">
-            <div class="d-flex align-items-center">
+            <div class="d-flex">
                 <div class="card-icon bg-primary text-white">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="flex-grow-1">
+                <div class="card-content">
                     <div class="card-value" id="todayHours">0.0h</div>
                     <div class="card-label">Today</div>
                     <div class="card-trend" data-trend="today">
@@ -71,11 +144,11 @@
     
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="dashboard-card">
-            <div class="d-flex align-items-center">
+            <div class="d-flex">
                 <div class="card-icon bg-success text-white">
                     <i class="fas fa-calendar-week"></i>
                 </div>
-                <div class="flex-grow-1">
+                <div class="card-content">
                     <div class="card-value" id="weekHours">0.0h</div>
                     <div class="card-label">This Week</div>
                     <div class="card-trend" data-trend="week">
@@ -91,11 +164,11 @@
     
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="dashboard-card">
-            <div class="d-flex align-items-center">
+            <div class="d-flex">
                 <div class="card-icon bg-warning text-white">
                     <i class="fas fa-play"></i>
                 </div>
-                <div class="flex-grow-1">
+                <div class="card-content">
                     <div class="card-value">{{ active_orders|length }}</div>
                     <div class="card-label">Active Timers</div>
                     <div class="card-trend">
@@ -111,7 +184,7 @@
                     </div>
                 </div>
             </div>
-            <div class="progress-bar-modern mt-2">
+            <div class="progress-bar-modern">
                 <div class="progress-bar-fill" style="width: {{ (active_orders|length / 5 * 100)|round|int }}%"></div>
             </div>
         </div>
@@ -119,11 +192,11 @@
     
     <div class="col-lg-3 col-md-6 mb-3">
         <div class="dashboard-card">
-            <div class="d-flex align-items-center">
+            <div class="d-flex">
                 <div class="card-icon bg-info text-white">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <div class="flex-grow-1">
+                <div class="card-content">
                     <div class="card-value">92%</div>
                     <div class="card-label">Efficiency</div>
                     <div class="card-trend">
@@ -133,7 +206,7 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex align-items-center mt-2">
+            <div class="d-flex align-items-center">
                 <svg class="progress-ring" width="40" height="40">
                     <circle class="progress-ring__circle" 
                             stroke="currentColor" stroke-width="3" 
