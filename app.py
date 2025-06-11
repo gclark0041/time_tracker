@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, make_response, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, make_response, send_file, send_from_directory, abort
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta, date
 from collections import defaultdict
@@ -1238,6 +1238,11 @@ def confirm_entries():
 def uploaded_file(filename):
     """Serve uploaded files"""
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve the PWA manifest file"""
+    return send_from_directory('static', 'manifest.json', mimetype='application/json')
 
 @app.route('/account/settings', methods=['GET', 'POST'])
 @login_required
