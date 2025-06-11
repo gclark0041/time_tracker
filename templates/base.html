@@ -892,10 +892,201 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Enhanced Mobile Responsiveness */
+        /* COMPREHENSIVE MOBILE OPTIMIZATION */
+        
+        /* Mobile-first responsive design */
         @media (max-width: 768px) {
+            /* Body and container improvements */
+            body {
+                padding-top: 10px;
+                padding-bottom: 60px; /* Space for FAB */
+            }
+            
+            .container {
+                padding-left: 8px;
+                padding-right: 8px;
+                padding-top: 0;
+            }
+            
+            /* Dashboard cards - mobile optimized */
             .dashboard-card {
-                padding: 1.5rem;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 12px;
+            }
+            
+            .dashboard-card .d-flex {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                margin-bottom: 1rem;
+            }
+            
+            .card-icon {
+                width: 60px;
+                height: 60px;
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .card-content {
+                align-items: center;
+                text-align: center;
+            }
+            
+            .card-value {
+                font-size: 2.5rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .card-label {
+                font-size: 1rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            /* Sidebar optimizations */
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .sidebar-nav-item {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+            
+            .sidebar-nav-item i {
+                width: 28px;
+                font-size: 1.2rem;
+                margin-right: 0.75rem;
+            }
+            
+            /* Quick actions mobile layout */
+            .quick-actions-container {
+                padding: 0.75rem 0;
+            }
+            
+            .quick-actions .btn {
+                font-size: 0.85rem;
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                flex: 1;
+                min-width: 100px;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Navigation improvements */
+            .nav-breadcrumb {
+                padding: 0.75rem;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Form optimizations */
+            .form-control, .form-select {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.875rem 1rem;
+                border-radius: 8px;
+            }
+            
+            .form-control-lg {
+                padding: 1rem 1.25rem;
+                font-size: 17px;
+            }
+            
+            .btn {
+                min-height: 44px; /* Apple's minimum touch target */
+                padding: 0.75rem 1.25rem;
+                border-radius: 8px;
+            }
+            
+            .btn-sm {
+                min-height: 38px;
+                padding: 0.5rem 1rem;
+            }
+            
+            /* Card improvements */
+            .card {
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            .card-header {
+                padding: 1rem;
+                border-radius: 12px 12px 0 0;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            /* Floating action button */
+            .fab-container {
+                bottom: 20px;
+                right: 16px;
+            }
+            
+            .fab-main {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .fab-action {
+                width: 48px;
+                height: 48px;
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+            }
+            
+            /* Notifications */
+            .pattern-notification {
+                right: 8px;
+                left: 8px;
+                top: 20px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+            
+            /* Table improvements */
+            .table-responsive {
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .table th, .table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+                vertical-align: middle;
+            }
+            
+            /* Alert optimizations */
+            .alert {
+                margin: 0 8px 1rem 8px;
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 576px) {
+            body {
+                padding-top: 8px;
+            }
+            
+            .container {
+                padding-left: 6px;
+                padding-right: 6px;
+            }
+            
+            /* Dashboard cards for small screens */
+            .dashboard-card {
+                padding: 0.875rem;
             }
             
             .card-value {
@@ -905,28 +1096,98 @@
             .card-icon {
                 width: 50px;
                 height: 50px;
-                margin-right: 1rem;
             }
             
-            .sidebar {
-                width: 100%;
-                left: -100%;
+            /* Quick actions for small screens */
+            .quick-actions .btn {
+                font-size: 0.8rem;
+                padding: 0.625rem 0.75rem;
+                min-width: 90px;
             }
             
-            .fab-container {
-                bottom: 15px;
-                right: 15px;
+            /* Form adjustments */
+            .form-control, .form-select {
+                font-size: 16px;
+                padding: 0.75rem;
             }
             
-            .pattern-notification {
-                right: 10px;
-                left: 10px;
-                min-width: auto;
-                top: 80px;
+            .btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
             }
             
-            .container {
-                padding-top: 0;
+            /* Navigation */
+            .nav-breadcrumb {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+            
+            .breadcrumb-item {
+                font-size: 0.85rem;
+            }
+            
+            /* Card spacing */
+            .card {
+                margin-bottom: 0.75rem;
+            }
+            
+            .card-header, .card-body {
+                padding: 0.875rem;
+            }
+            
+            /* Typography scaling */
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.1rem; }
+            h5 { font-size: 1rem; }
+            h6 { font-size: 0.9rem; }
+            
+            /* Sidebar adjustments */
+            .sidebar-header {
+                padding: 1rem;
+            }
+            
+            .sidebar-nav-item {
+                padding: 0.875rem 1rem;
+                font-size: 0.95rem;
+            }
+            
+            .sidebar-nav-item i {
+                width: 24px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            /* Ultra-compact layout */
+            .dashboard-card {
+                padding: 0.75rem;
+            }
+            
+            .card-value {
+                font-size: 1.75rem;
+            }
+            
+            .card-icon {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .quick-actions .btn {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+                min-width: 80px;
+            }
+            
+            .form-control, .form-select {
+                padding: 0.625rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 0.875rem;
+                font-size: 0.8rem;
             }
         }
 
@@ -986,56 +1247,213 @@
             }
         }
         
-        /* Quick actions responsiveness */
+        /* MOBILE-OPTIMIZED COMPONENTS */
+        
+        /* Mobile form enhancements */
         @media (max-width: 768px) {
-            .quick-actions-container {
+            /* Form layouts */
+            .form-check-card {
+                margin-bottom: 0.75rem;
+            }
+            
+            .card-like-label {
+                padding: 1rem;
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+            
+            /* Quick duration buttons */
+            .quick-duration-buttons {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .quick-duration-buttons .btn {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            
+            /* Template buttons */
+            .quick-actions .quick-btn {
+                flex: 1;
+                min-width: 0;
+                margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+                padding: 0.625rem 0.5rem;
+            }
+            
+            /* Date/time inputs */
+            .datetime-row {
+                display: flex;
                 flex-direction: column;
-                align-items: stretch;
                 gap: 1rem;
             }
             
-            .quick-actions {
-                order: 2;
-                justify-content: center;
+            /* Table mobile view */
+            .table-mobile-card {
+                display: none;
             }
             
-            .quick-actions .btn {
-                font-size: 0.875rem;
-                padding: 0.75rem 1rem;
-                flex: 1;
-                min-width: 120px;
+            .table-responsive table {
+                font-size: 0.8rem;
             }
             
-            .quick-actions-container > div:first-child {
-                order: 1;
-                justify-content: center;
+            .table th {
+                font-size: 0.75rem;
+                padding: 0.5rem 0.25rem;
             }
             
-            .quick-actions-container > div:last-child {
-                order: 3;
-                justify-content: center;
+            .table td {
+                padding: 0.5rem 0.25rem;
+                word-break: break-word;
+            }
+            
+            /* Mobile card layout for data */
+            .mobile-data-card {
+                background: var(--bg-primary);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-data-card .data-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.25rem 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .mobile-data-card .data-row:last-child {
+                border-bottom: none;
+            }
+            
+            .mobile-data-card .data-label {
+                font-weight: 600;
+                color: var(--text-secondary);
+                font-size: 0.85rem;
+            }
+            
+            .mobile-data-card .data-value {
+                font-weight: 500;
+                color: var(--text-primary);
+            }
+            
+            /* Status badges mobile */
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+            }
+            
+            /* Action buttons mobile */
+            .mobile-actions {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+                justify-content: flex-end;
+            }
+            
+            .mobile-actions .btn {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.75rem;
             }
         }
         
+        /* Enhanced small screen optimizations */
         @media (max-width: 576px) {
-            .quick-actions {
-                gap: 0.75rem !important;
+            /* Grid improvements */
+            .quick-duration-buttons {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .quick-actions .btn {
+            /* Form improvements */
+            .form-floating label {
+                font-size: 0.85rem;
+            }
+            
+            /* Card header improvements */
+            .card-header .d-flex {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+            
+            .card-header .btn-group {
+                width: 100%;
+            }
+            
+            .card-header .btn-group .btn {
+                flex: 1;
                 font-size: 0.8rem;
-                padding: 0.6rem 0.75rem;
-                min-width: 100px;
             }
             
-            .quick-actions-container > div:last-child .btn {
+            /* Mobile data improvements */
+            .mobile-data-card {
+                padding: 0.75rem;
+            }
+            
+            .mobile-data-card .data-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+            
+            .mobile-actions {
+                flex-direction: column;
+            }
+            
+            .mobile-actions .btn {
+                width: 100%;
+            }
+            
+            /* Typography adjustments */
+            .small, small {
                 font-size: 0.8rem;
-                padding: 0.6rem 1rem;
             }
             
-            .nav-breadcrumb {
-                padding: 0.75rem 1rem;
-                margin-bottom: 1rem;
+            .text-muted {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (max-width: 768px) and (pointer: coarse) {
+            /* Larger touch targets */
+            .btn, .form-control, .form-select {
+                min-height: 48px;
+            }
+            
+            .btn-sm {
+                min-height: 40px;
+            }
+            
+            /* Better spacing for touch */
+            .form-group, .mb-3 {
+                margin-bottom: 1.5rem;
+            }
+            
+            /* Improved tap targets */
+            .nav-link, .dropdown-item, .list-group-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+            
+            /* Better checkbox/radio sizing */
+            .form-check-input {
+                width: 1.25rem;
+                height: 1.25rem;
+                margin-top: 0.125rem;
+            }
+            
+            .form-switch .form-check-input {
+                width: 2.5rem;
+                height: 1.25rem;
             }
         }
 

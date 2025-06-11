@@ -32,17 +32,17 @@
             <div class="card-body">
                 <form method="GET" class="mb-4">
                     <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-lg-3 col-md-6">
                             <label for="start_date" class="form-label">Start Date</label>
                             <input type="date" class="form-control" id="start_date" name="start_date" 
                                    value="{{ request.args.get('start_date', start_date) }}">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-lg-3 col-md-6">
                             <label for="end_date" class="form-label">End Date</label>
                             <input type="date" class="form-control" id="end_date" name="end_date" 
                                    value="{{ request.args.get('end_date', end_date) }}">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-lg-3 col-md-8">
                             <label for="employee" class="form-label">Employee</label>
                             <select class="form-select" id="employee" name="employee">
                                 <option value="">All Employees</option>
@@ -51,7 +51,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-lg-3 col-md-4">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fas fa-filter"></i> Filter
                             </button>
@@ -60,8 +60,8 @@
                 </form>
                 
                 <div class="report-summary mb-4">
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="row g-3">
+                        <div class="col-lg-4 col-sm-6">
                             <div class="card bg-light">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">Total Hours</h5>
@@ -69,7 +69,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-lg-4 col-sm-6">
                             <div class="card bg-light">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">Service Order Hours</h5>
@@ -77,7 +77,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-lg-4 col-sm-12">
                             <div class="card bg-light">
                                 <div class="card-body text-center">
                                     <h5 class="card-title">Other Time Hours</h5>
@@ -99,7 +99,8 @@
                                     </span>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive">
+                                    <!-- Desktop Table View -->
+                                    <div class="table-responsive d-none d-md-block">
                                         <table class="table table-striped">
                                             <thead>
                                                 <tr>
@@ -151,6 +152,50 @@
                                                 </tr>
                                             </tfoot>
                                         </table>
+                                    </div>
+                                    
+                                    <!-- Mobile Card View -->
+                                    <div class="d-md-none">
+                                        {% for entry in entries %}
+                                            <div class="mobile-data-card">
+                                                <div class="data-row">
+                                                    <span class="data-label">Employee</span>
+                                                    <span class="data-value">{{ entry.employee_name }}</span>
+                                                </div>
+                                                <div class="data-row">
+                                                    <span class="data-label">Type</span>
+                                                    <span class="data-value">
+                                                        {% if entry.entry_type == 'service_order' %}
+                                                            <span class="badge bg-primary">{{ entry.order_number }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning text-dark">{{ entry.category }}</span>
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="data-row">
+                                                    <span class="data-label">Time</span>
+                                                    <span class="data-value">{{ entry.start_time.strftime('%H:%M') }} - {{ entry.end_time.strftime('%H:%M') }}</span>
+                                                </div>
+                                                <div class="data-row">
+                                                    <span class="data-label">Duration</span>
+                                                    <span class="data-value"><strong>{{ "{:.2f}".format(entry.hours) }} hrs</strong></span>
+                                                </div>
+                                                {% if entry.notes %}
+                                                <div class="data-row">
+                                                    <span class="data-label">Notes</span>
+                                                    <span class="data-value">{{ entry.notes }}</span>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                        
+                                        <!-- Mobile Daily Total -->
+                                        <div class="card bg-light mt-3">
+                                            <div class="card-body text-center">
+                                                <h6 class="mb-1">Daily Total</h6>
+                                                <h4 class="mb-0 text-primary">{{ "{:.2f}".format(day_totals[day]) }} hrs</h4>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
