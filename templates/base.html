@@ -629,6 +629,401 @@
             font-size: 0.875rem;
             font-weight: 500;
         }
+
+        /* Enhanced Mobile Experience */
+        
+        /* Pull-to-refresh styling */
+        .pull-refresh-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pull-refresh-indicator {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .pull-refresh-indicator.visible {
+            top: 10px;
+        }
+
+        .pull-refresh-indicator.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Swipe gesture indicators */
+        .swipe-item {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .swipe-actions-left,
+        .swipe-actions-right {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        .swipe-actions-left {
+            left: -80px;
+            background: var(--success-color);
+        }
+
+        .swipe-actions-right {
+            right: -80px;
+            background: var(--danger-color);
+        }
+
+        .swipe-item.swiping-left .swipe-actions-left {
+            left: 0;
+        }
+
+        .swipe-item.swiping-right .swipe-actions-right {
+            right: 0;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info-color);
+        }
+
+        /* Auto-complete dropdown */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1050;
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.highlighted {
+            background-color: var(--bg-secondary);
+        }
+
+        .autocomplete-item i {
+            margin-right: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .autocomplete-item .time-suggestion {
+            margin-left: auto;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced floating action buttons */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        .fab-main.open {
+            transform: rotate(45deg);
+        }
+
+        .fab-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .fab-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .fab-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .fab-item:hover {
+            transform: scale(1.1);
+        }
+
+        .fab-item::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 60px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .fab-item:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fab-timer {
+            background: var(--success-color);
+        }
+
+        .fab-camera {
+            background: var(--info-color);
+        }
+
+        .fab-report {
+            background: var(--warning-color);
+        }
+
+        .fab-voice {
+            background: var(--purple-color, #8b5cf6);
+        }
+
+        /* Voice input indicator */
+        .voice-recording {
+            position: relative;
+        }
+
+        .voice-recording::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: var(--danger-color);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        /* Smart suggestion badges */
+        .smart-suggestion {
+            display: inline-block;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            margin: 0.25rem 0.25rem 0.25rem 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .smart-suggestion:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .smart-suggestion i {
+            margin-right: 0.25rem;
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner-large {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(37, 99, 235, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Pattern detection notifications */
+        .pattern-notification {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1050;
+        }
+
+        .pattern-notification.show {
+            transform: translateY(0);
+        }
+
+        .pattern-notification .close-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Mobile-specific enhancements */
+        @media (max-width: 768px) {
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .fab-container {
+                bottom: 80px; /* Account for mobile browser bars */
+            }
+
+            .autocomplete-dropdown {
+                max-height: 150px;
+            }
+
+            .pattern-notification {
+                bottom: 80px;
+                margin: 0 10px;
+            }
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -878,17 +1273,57 @@
     </div>
 
     <!-- Floating Timer Widget -->
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     {% if current_user.is_authenticated %}
+    <!-- Pull-to-refresh indicator -->
+    <div class="pull-refresh-indicator" id="pullRefreshIndicator">
+        <i class="fas fa-arrow-down" id="pullRefreshIcon"></i>
+    </div>
+
+    <!-- Enhanced Floating Action Buttons -->
+    <div class="fab-container">
+        <div class="fab-menu" id="fabMenu">
+            <button class="fab-item fab-timer" data-tooltip="Quick Timer" onclick="startQuickTimer()">
+                <i class="fas fa-stopwatch"></i>
+            </button>
+            <button class="fab-item fab-camera" data-tooltip="Scan Receipt" onclick="openCamera()">
+                <i class="fas fa-camera"></i>
+            </button>
+            <button class="fab-item fab-voice" data-tooltip="Voice Note" onclick="startVoiceInput()">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="fab-item fab-report" data-tooltip="Quick Report" onclick="quickReport()">
+                <i class="fas fa-chart-bar"></i>
+            </button>
+        </div>
+        <button class="fab-main" id="fabMain" onclick="toggleFAB()">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Pattern Detection Notification -->
+    <div class="pattern-notification" id="patternNotification">
+        <button class="close-btn" onclick="closePatternNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-lightbulb text-warning me-2"></i>
+            <div>
+                <strong>Smart Suggestion</strong>
+                <p class="mb-0 mt-1" id="patternMessage">You've been working for 4 hours. Consider taking a break?</p>
+            </div>
+        </div>
+        <div class="mt-2">
+            <button class="btn btn-sm btn-primary me-2" onclick="acceptPatternSuggestion()">Accept</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="dismissPatternSuggestion()">Not now</button>
+        </div>
+    </div>
+
     <div class="floating-timer d-none" id="floatingTimer" onclick="showActiveTimers()">
         <i class="fas fa-clock me-2"></i>
         <span id="activeTimerCount">0</span> active
-    </div>
-
-    <!-- Mobile FAB -->
-    <div class="mobile-fab d-md-none">
-        <a href="{{ url_for('add_order') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-        </a>
     </div>
     {% endif %}
 
@@ -1106,17 +1541,535 @@ Keyboard Shortcuts:
             }
         });
 
-        // Initialize navigation enhancements
+        // Enhanced Mobile Experience Functions
+        
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 4000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="fas ${getToastIcon(type)} me-2"></i>
+                    <strong class="me-auto">${getToastTitle(type)}</strong>
+                    <button type="button" class="btn-close" onclick="removeToast('${toastId}')"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast with animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Auto-remove toast
+            setTimeout(() => {
+                removeToast(toastId);
+            }, duration);
+        }
+        
+        function getToastIcon(type) {
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+            return icons[type] || icons.info;
+        }
+        
+        function getToastTitle(type) {
+            const titles = {
+                success: 'Success',
+                error: 'Error',
+                warning: 'Warning',
+                info: 'Info'
+            };
+            return titles[type] || titles.info;
+        }
+        
+        function removeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+
+        // Pull-to-refresh functionality
+        let pullToRefreshActive = false;
+        let startY = 0;
+        let currentY = 0;
+        let pullDistance = 0;
+        
+        function setupPullToRefresh() {
+            const indicator = document.getElementById('pullRefreshIndicator');
+            const icon = document.getElementById('pullRefreshIcon');
+            
+            if (!indicator) return;
+            
+            document.addEventListener('touchstart', (e) => {
+                if (window.scrollY === 0) {
+                    startY = e.touches[0].pageY;
+                    pullToRefreshActive = true;
+                }
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!pullToRefreshActive) return;
+                
+                currentY = e.touches[0].pageY;
+                pullDistance = currentY - startY;
+                
+                if (pullDistance > 0 && pullDistance < 120) {
+                    e.preventDefault();
+                    indicator.style.transform = `translateX(-50%) translateY(${pullDistance - 60}px)`;
+                    
+                    if (pullDistance > 60) {
+                        indicator.classList.add('visible');
+                        icon.className = 'fas fa-sync-alt';
+                    } else {
+                        indicator.classList.remove('visible');
+                        icon.className = 'fas fa-arrow-down';
+                    }
+                }
+            });
+            
+            document.addEventListener('touchend', () => {
+                if (pullToRefreshActive && pullDistance > 60) {
+                    // Trigger refresh
+                    indicator.classList.add('loading');
+                    icon.className = 'fas fa-sync-alt';
+                    
+                    // Simulate refresh
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Reset
+                    indicator.style.transform = 'translateX(-50%) translateY(-60px)';
+                    indicator.classList.remove('visible');
+                    icon.className = 'fas fa-arrow-down';
+                }
+                
+                pullToRefreshActive = false;
+                pullDistance = 0;
+            });
+        }
+
+        // Swipe gestures for table rows
+        function setupSwipeGestures() {
+            const swipeItems = document.querySelectorAll('.swipe-item');
+            
+            swipeItems.forEach(item => {
+                let startX = 0;
+                let currentX = 0;
+                let isSwipeActive = false;
+                
+                // Add swipe action elements
+                if (!item.querySelector('.swipe-actions-left')) {
+                    const leftActions = document.createElement('div');
+                    leftActions.className = 'swipe-actions-left';
+                    leftActions.innerHTML = '<i class="fas fa-check"></i>';
+                    leftActions.addEventListener('click', () => completeEntry(item));
+                    item.appendChild(leftActions);
+                }
+                
+                if (!item.querySelector('.swipe-actions-right')) {
+                    const rightActions = document.createElement('div');
+                    rightActions.className = 'swipe-actions-right';
+                    rightActions.innerHTML = '<i class="fas fa-edit"></i>';
+                    rightActions.addEventListener('click', () => editEntry(item));
+                    item.appendChild(rightActions);
+                }
+                
+                item.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].pageX;
+                    isSwipeActive = true;
+                });
+                
+                item.addEventListener('touchmove', (e) => {
+                    if (!isSwipeActive) return;
+                    
+                    currentX = e.touches[0].pageX;
+                    const diffX = startX - currentX;
+                    
+                    if (Math.abs(diffX) > 30) {
+                        e.preventDefault();
+                        
+                        if (diffX > 0) {
+                            item.classList.add('swiping-left');
+                            item.classList.remove('swiping-right');
+                        } else {
+                            item.classList.add('swiping-right');
+                            item.classList.remove('swiping-left');
+                        }
+                    }
+                });
+                
+                item.addEventListener('touchend', () => {
+                    if (isSwipeActive) {
+                        const diffX = startX - currentX;
+                        
+                        if (Math.abs(diffX) > 80) {
+                            if (diffX > 0) {
+                                completeEntry(item);
+                            } else {
+                                editEntry(item);
+                            }
+                        }
+                        
+                        // Reset swipe state
+                        item.classList.remove('swiping-left', 'swiping-right');
+                        isSwipeActive = false;
+                    }
+                });
+            });
+        }
+
+        // Auto-complete functionality
+        const autocompleteData = {
+            orders: [],
+            employees: [],
+            notes: []
+        };
+        
+        function setupAutoComplete() {
+            const orderInput = document.getElementById('order_number');
+            const employeeInput = document.getElementById('employee_name');
+            const notesInput = document.getElementById('notes');
+            
+            // Load autocomplete data from localStorage or API
+            loadAutocompleteData();
+            
+            if (orderInput) {
+                setupInputAutocomplete(orderInput, 'orders', 'fas fa-clipboard-list');
+            }
+            
+            if (employeeInput) {
+                setupInputAutocomplete(employeeInput, 'employees', 'fas fa-user');
+            }
+            
+            if (notesInput) {
+                setupNotesAutocomplete(notesInput);
+            }
+        }
+        
+        function setupInputAutocomplete(input, dataType, icon) {
+            const container = input.parentElement;
+            let dropdown = container.querySelector('.autocomplete-dropdown');
+            
+            if (!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.className = 'autocomplete-dropdown';
+                container.appendChild(dropdown);
+            }
+            
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase();
+                
+                if (value.length < 2) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+                
+                const matches = autocompleteData[dataType].filter(item => 
+                    item.toLowerCase().includes(value)
+                ).slice(0, 5);
+                
+                if (matches.length > 0) {
+                    dropdown.innerHTML = matches.map(match => `
+                        <div class="autocomplete-item" onclick="selectAutocomplete('${input.id}', '${match}')">
+                            <i class="${icon}"></i>
+                            ${match}
+                        </div>
+                    `).join('');
+                    dropdown.classList.add('show');
+                } else {
+                    dropdown.classList.remove('show');
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        function selectAutocomplete(inputId, value) {
+            const input = document.getElementById(inputId);
+            input.value = value;
+            input.parentElement.querySelector('.autocomplete-dropdown').classList.remove('show');
+            
+            // Add to recent items
+            saveToAutocomplete(inputId, value);
+            
+            // Show smart time suggestion for orders
+            if (inputId === 'order_number') {
+                showSmartTimeSuggestions(value);
+            }
+        }
+        
+        function loadAutocompleteData() {
+            const saved = localStorage.getItem('timeTrackerAutocomplete');
+            if (saved) {
+                Object.assign(autocompleteData, JSON.parse(saved));
+            }
+        }
+        
+        function saveToAutocomplete(type, value) {
+            const dataType = type.replace('_number', '').replace('_name', '') + 's';
+            if (autocompleteData[dataType] && !autocompleteData[dataType].includes(value)) {
+                autocompleteData[dataType].unshift(value);
+                autocompleteData[dataType] = autocompleteData[dataType].slice(0, 10); // Keep only last 10
+                localStorage.setItem('timeTrackerAutocomplete', JSON.stringify(autocompleteData));
+            }
+        }
+
+        // Floating Action Button functionality
+        function toggleFAB() {
+            const fabMain = document.getElementById('fabMain');
+            const fabMenu = document.getElementById('fabMenu');
+            
+            fabMain.classList.toggle('open');
+            fabMenu.classList.toggle('open');
+        }
+        
+        function startQuickTimer() {
+            showToast('Quick timer started for current task', 'success');
+            toggleFAB();
+            // Add logic to start timer
+        }
+        
+        function openCamera() {
+            // Check if device has camera
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                window.location.href = "{{ url_for('upload_image') }}";
+            } else {
+                showToast('Camera not available on this device', 'warning');
+            }
+            toggleFAB();
+        }
+        
+        function startVoiceInput() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.start();
+                showToast('Listening... Speak now!', 'info', 6000);
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    const notesInput = document.getElementById('notes');
+                    if (notesInput) {
+                        notesInput.value += (notesInput.value ? ' ' : '') + transcript;
+                        notesInput.classList.add('voice-recording');
+                        setTimeout(() => notesInput.classList.remove('voice-recording'), 2000);
+                    }
+                    showToast(`Voice note added: "${transcript}"`, 'success');
+                };
+                
+                recognition.onerror = function(event) {
+                    showToast('Voice recognition error. Please try again.', 'error');
+                };
+            } else {
+                showToast('Voice input not supported on this device', 'warning');
+            }
+            toggleFAB();
+        }
+        
+        function quickReport() {
+            window.location.href = "{{ url_for('reports') }}";
+            toggleFAB();
+        }
+
+        // Pattern detection and smart suggestions
+        function checkWorkPatterns() {
+            const now = new Date();
+            const workStartTime = localStorage.getItem('workStartTime');
+            
+            if (workStartTime) {
+                const startTime = new Date(workStartTime);
+                const hoursWorked = (now - startTime) / (1000 * 60 * 60);
+                
+                // Suggest break after 4 hours
+                if (hoursWorked > 4 && !localStorage.getItem('breakSuggested')) {
+                    showPatternNotification(
+                        `You've been working for ${Math.floor(hoursWorked)} hours. Consider taking a break?`,
+                        'break'
+                    );
+                    localStorage.setItem('breakSuggested', 'true');
+                }
+                
+                // Suggest end of day after 8 hours
+                if (hoursWorked > 8 && !localStorage.getItem('dayEndSuggested')) {
+                    showPatternNotification(
+                        'You\'ve worked a full day! Consider clocking out.',
+                        'end_day'
+                    );
+                    localStorage.setItem('dayEndSuggested', 'true');
+                }
+            }
+        }
+        
+        function showPatternNotification(message, type) {
+            const notification = document.getElementById('patternNotification');
+            const messageEl = document.getElementById('patternMessage');
+            
+            messageEl.textContent = message;
+            notification.setAttribute('data-suggestion-type', type);
+            notification.classList.add('show');
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 10000);
+        }
+        
+        function closePatternNotification() {
+            document.getElementById('patternNotification').classList.remove('show');
+        }
+        
+        function acceptPatternSuggestion() {
+            const notification = document.getElementById('patternNotification');
+            const type = notification.getAttribute('data-suggestion-type');
+            
+            if (type === 'break') {
+                window.location.href = "{{ url_for('add_order') }}?quick=break";
+            } else if (type === 'end_day') {
+                // Clock out logic here
+                showToast('Great work today! Remember to save your entries.', 'success');
+            }
+            
+            closePatternNotification();
+        }
+        
+        function dismissPatternSuggestion() {
+            closePatternNotification();
+        }
+
+        // Smart time suggestions
+        function showSmartTimeSuggestions(orderNumber) {
+            // Get historical data for this order
+            const suggestions = getTimeSuggestionsForOrder(orderNumber);
+            
+            if (suggestions.length > 0) {
+                const container = document.querySelector('#order_number').closest('.mb-3');
+                let suggestionsEl = container.querySelector('.smart-suggestions');
+                
+                if (!suggestionsEl) {
+                    suggestionsEl = document.createElement('div');
+                    suggestionsEl.className = 'smart-suggestions mt-2';
+                    container.appendChild(suggestionsEl);
+                }
+                
+                suggestionsEl.innerHTML = `
+                    <small class="text-muted">
+                        <i class="fas fa-brain me-1"></i> Smart suggestions:
+                    </small><br>
+                    ${suggestions.map(s => `
+                        <span class="smart-suggestion" onclick="applySuggestion('${s.type}', '${s.value}')">
+                            <i class="${s.icon}"></i> ${s.label}
+                        </span>
+                    `).join('')}
+                `;
+            }
+        }
+        
+        function getTimeSuggestionsForOrder(orderNumber) {
+            // Mock suggestions - replace with actual data
+            return [
+                { type: 'duration', value: '2', label: '~2 hours', icon: 'fas fa-clock' },
+                { type: 'note', value: 'Initial setup and configuration', label: 'Setup', icon: 'fas fa-cog' },
+                { type: 'note', value: 'Quality check and testing', label: 'QC', icon: 'fas fa-check' }
+            ];
+        }
+        
+        function applySuggestion(type, value) {
+            if (type === 'duration') {
+                const quickDurationBtn = document.querySelector(`[onclick="setQuickDuration(${value * 60})"]`);
+                if (quickDurationBtn) quickDurationBtn.click();
+            } else if (type === 'note') {
+                const notesInput = document.getElementById('notes');
+                if (notesInput) {
+                    notesInput.value += (notesInput.value ? ', ' : '') + value;
+                }
+            }
+            showToast(`Applied suggestion: ${value}`, 'success');
+        }
+
+        // Entry action functions for swipe gestures
+        function completeEntry(item) {
+            const orderId = item.getAttribute('data-order-id');
+            if (orderId) {
+                // Submit completion
+                showToast('Entry marked as complete', 'success');
+                item.style.opacity = '0.6';
+            }
+        }
+        
+        function editEntry(item) {
+            const orderId = item.getAttribute('data-order-id');
+            if (orderId) {
+                window.location.href = `/edit_order/${orderId}`;
+            }
+        }
+
+        // Initialize all enhanced features
         document.addEventListener('DOMContentLoaded', function() {
             setupSearch();
             setupMobileNavigation();
+            setupPullToRefresh();
+            setupSwipeGestures();
+            setupAutoComplete();
             
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
+            
+            // Start pattern detection
+            if (window.location.pathname === "{{ url_for('index') }}") {
+                setInterval(checkWorkPatterns, 300000); // Check every 5 minutes
+            }
+            
+            // Close FAB when clicking outside
+            document.addEventListener('click', function(e) {
+                const fabContainer = document.querySelector('.fab-container');
+                if (fabContainer && !fabContainer.contains(e.target)) {
+                    const fabMain = document.getElementById('fabMain');
+                    const fabMenu = document.getElementById('fabMenu');
+                    fabMain.classList.remove('open');
+                    fabMenu.classList.remove('open');
+                }
+            });
         });
+
+        // Make functions globally available
+        window.showToast = showToast;
+        window.toggleFAB = toggleFAB;
+        window.startQuickTimer = startQuickTimer;
+        window.openCamera = openCamera;
+        window.startVoiceInput = startVoiceInput;
+        window.quickReport = quickReport;
+        window.closePatternNotification = closePatternNotification;
+        window.acceptPatternSuggestion = acceptPatternSuggestion;
+        window.dismissPatternSuggestion = dismissPatternSuggestion;
 
         // Auto-refresh functionality
         function enableAutoRefresh() {
