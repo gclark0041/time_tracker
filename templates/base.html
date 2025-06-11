@@ -67,12 +67,313 @@
             box-shadow: var(--shadow-md);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 1040;
         }
 
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            font-size: 1.8rem;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .navbar-nav {
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-nav .nav-link.active::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 1px;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow-lg);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background-color: var(--bg-primary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-secondary);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: var(--bg-primary);
+                margin-top: 1rem;
+                border-radius: 12px;
+                padding: 1rem;
+                box-shadow: var(--shadow-lg);
+                border: 1px solid var(--border-color);
+            }
+
+            .navbar-nav {
+                gap: 0.5rem;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 1rem;
+                margin: 0.25rem 0;
+                border-radius: 12px;
+                background-color: var(--bg-secondary);
+                border: 1px solid var(--border-color);
+            }
+
+            .navbar-nav .nav-link:hover {
+                background-color: var(--bg-tertiary);
+                transform: none;
+            }
+
+            .navbar-nav .nav-link.active {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .dropdown-menu {
+                position: static;
+                float: none;
+                box-shadow: none;
+                background-color: var(--bg-tertiary);
+                margin: 0.5rem 0 0 0;
+                border: 1px solid var(--border-color);
+            }
+
+            .nav-link i {
+                min-width: 24px;
+                text-align: center;
+                margin-right: 0.75rem;
+            }
+        }
+
+        .navbar-toggler {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-toggler:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+        }
+
+        .navbar-toggler-icon {
+            background-image: none;
+            position: relative;
+            width: 24px;
+            height: 18px;
+        }
+
+        .navbar-toggler-icon::before,
+        .navbar-toggler-icon::after,
+        .navbar-toggler-icon {
+            display: block;
+            content: '';
+            width: 24px;
+            height: 2px;
+            background-color: white;
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler-icon::before {
+            position: absolute;
+            top: 0;
+        }
+
+        .navbar-toggler-icon::after {
+            position: absolute;
+            bottom: 0;
+        }
+
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+            background-color: transparent;
+        }
+
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::before {
+            transform: rotate(45deg);
+            top: 8px;
+        }
+
+        .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon::after {
+            transform: rotate(-45deg);
+            bottom: 8px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+            transform: rotate(180deg);
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 50px;
+            min-width: 1.2rem;
+            text-align: center;
+            line-height: 1;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success-color), var(--info-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .nav-search {
+            position: relative;
+            max-width: 300px;
+            margin: 0 1rem;
+        }
+
+        .nav-search input {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 20px;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            width: 100%;
+        }
+
+        .nav-search input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-search i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (max-width: 991.98px) {
+            .nav-search {
+                margin: 1rem 0;
+                max-width: none;
+            }
+        }
+
+        .nav-breadcrumb {
+            background: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .nav-breadcrumb .breadcrumb-item a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-breadcrumb .breadcrumb-item a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-breadcrumb .breadcrumb-item.active {
+            color: var(--text-primary);
         }
 
         .card {
@@ -212,21 +513,6 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .theme-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
         .table {
             background-color: var(--bg-primary);
             color: var(--text-primary);
@@ -349,85 +635,210 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container">
+            <!-- Brand -->
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-clock me-2"></i> Time Tracker
+                <i class="fas fa-clock"></i>
+                <span class="d-none d-sm-inline">Time Tracker</span>
+                <span class="d-sm-none">TT</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            
+            <!-- Mobile Search (visible on small screens) -->
+            <div class="nav-search d-lg-none d-md-block order-2">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control" placeholder="Quick search..." id="mobileSearch">
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler order-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+
+            <!-- Main Navigation -->
+            <div class="collapse navbar-collapse order-4 order-lg-2" id="navbarNav">
+                <!-- Primary Navigation -->
+                <ul class="navbar-nav me-auto">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i> Dashboard
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
                         </a>
                     </li>
+                    
+                    <!-- Time Tracking Section -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.path == url_for('add_order') or '/upload_image' in request.path %}active{% endif %}" href="#" id="timeTrackingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-clock"></i>
+                            <span>Time Tracking</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="timeTrackingDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('add_order') }}">
+                                <i class="fas fa-plus"></i> New Entry
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('upload_image') }}">
+                                <i class="fas fa-camera"></i> Import from Image
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="showQuickTimer()">
+                                <i class="fas fa-stopwatch"></i> Quick Timer
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Reports Section -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if '/reports' in request.path or '/weekly_report' in request.path %}active{% endif %}" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reports</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('reports') }}">
+                                <i class="fas fa-chart-bar"></i> Analytics
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('weekly_report') }}">
+                                <i class="fas fa-file-invoice-dollar"></i> Payroll Report
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('export_data') }}">
+                                <i class="fas fa-download"></i> Export Data
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Admin/Manager Section -->
                     {% if current_user.is_admin %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if '/admin/' in request.path %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-shield-alt me-1"></i> Admin
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Admin</span>
+                            <span class="nav-badge d-none" id="adminNotifications">2</span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('admin_user_management') }}"><i class="fas fa-users me-2"></i> User Management</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin_settings') }}"><i class="fas fa-cogs me-2"></i> System Settings</a></li>
+                            <li><h6 class="dropdown-header">User Management</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_user_management') }}">
+                                <i class="fas fa-users"></i> Manage Users
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">System</h6></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin_settings') }}">
+                                <i class="fas fa-cogs"></i> Settings
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showSystemStatus()">
+                                <i class="fas fa-server"></i> System Status
+                            </a></li>
                         </ul>
                     </li>
                     {% elif current_user.is_manager %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-users me-1"></i> My Team
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="managerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Team</span>
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="managerDropdown">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-users"></i> My Team
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-chart-pie"></i> Team Reports
+                            </a></li>
+                        </ul>
                     </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == url_for('add_order') %}active{% endif %}" href="{{ url_for('add_order') }}">
-                            <i class="fas fa-plus me-1"></i> New Entry
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/reports' in request.path %}active{% endif %}" href="{{ url_for('reports') }}">
-                            <i class="fas fa-chart-bar me-1"></i> Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/weekly_report' in request.path %}active{% endif %}" href="{{ url_for('weekly_report') }}">
-                            <i class="fas fa-file-invoice-dollar me-1"></i> Payroll
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/upload_image' in request.path %}active{% endif %}" href="{{ url_for('upload_image') }}">
-                            <i class="fas fa-camera me-1"></i> Import Image
-                        </a>
-                    </li>
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav ms-auto">
+
+                <!-- Desktop Search (hidden on mobile) -->
+                <div class="nav-search d-none d-lg-block">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Search orders, employees..." id="desktopSearch">
+                </div>
+
+                <!-- Secondary Navigation -->
+                <ul class="navbar-nav">
+                    <!-- Notifications -->
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown d-none d-md-block">
+                        <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="nav-badge" id="notificationCount">3</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 300px;">
+                            <li><h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                                Notifications
+                                <small class="text-muted">Mark all read</small>
+                            </h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">
+                                <div class="d-flex">
+                                    <i class="fas fa-clock text-warning me-2 mt-1"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">Timer Running</div>
+                                        <small class="text-muted">Order #12345 - 2h 45m</small>
+                                    </div>
+                                </div>
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <div class="d-flex">
+                                    <i class="fas fa-user-plus text-info me-2 mt-1"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold">New User Registered</div>
+                                        <small class="text-muted">John Doe joined the team</small>
+                                    </div>
+                                </div>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center" href="#">View All Notifications</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Theme Toggle -->
                     <li class="nav-item">
-                        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode" data-bs-toggle="tooltip">
                             <i class="fas fa-moon" id="theme-icon"></i>
                         </button>
                     </li>
+
+                    <!-- User Menu -->
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">
+                                {{ current_user.username[0].upper() }}
+                            </div>
+                            <span class="d-none d-lg-inline">{{ current_user.get_full_name() or current_user.username }}</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('account_settings') }}"><i class="fas fa-user-cog me-2"></i> Account Settings</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><h6 class="dropdown-header">
+                                {{ current_user.get_full_name() or current_user.username }}
+                                <br><small class="text-muted">{{ current_user.email }}</small>
+                            </h6></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('account_settings') }}">
+                                <i class="fas fa-user-cog"></i> Account Settings
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showHelp()">
+                                <i class="fas fa-question-circle"></i> Help & Support
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showKeyboardShortcuts()">
+                                <i class="fas fa-keyboard"></i> Keyboard Shortcuts
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('login') %}active{% endif %}" href="{{ url_for('login') }}">
-                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == url_for('register') %}active{% endif %}" href="{{ url_for('register') }}">
-                            <i class="fas fa-user-plus me-1"></i> Register
+                            <i class="fas fa-user-plus"></i>
+                            <span>Register</span>
                         </a>
                     </li>
                     {% endif %}
@@ -435,6 +846,20 @@
             </div>
         </div>
     </nav>
+
+    <!-- Breadcrumb Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav aria-label="breadcrumb" class="container">
+        <ol class="breadcrumb nav-breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            {% block breadcrumb %}{% endblock %}
+        </ol>
+    </nav>
+    {% endif %}
 
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -566,25 +991,131 @@
             }
         });
 
-        // Keyboard shortcuts
+        // Navigation enhancements
+        function showQuickTimer() {
+            // Quick timer modal functionality
+            alert('Quick Timer feature coming soon!');
+        }
+
+        function showSystemStatus() {
+            alert('System Status dashboard coming soon!');
+        }
+
+        function showHelp() {
+            alert('Help & Support coming soon!');
+        }
+
+        function showKeyboardShortcuts() {
+            const shortcuts = `
+Keyboard Shortcuts:
+• Ctrl + N: New Time Entry
+• Ctrl + R: Reports
+• Ctrl + D: Dashboard
+• Ctrl + T: Toggle Theme
+• Ctrl + /: Search
+• Esc: Close modals
+            `;
+            alert(shortcuts);
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const desktopSearch = document.getElementById('desktopSearch');
+            const mobileSearch = document.getElementById('mobileSearch');
+            
+            [desktopSearch, mobileSearch].forEach(searchInput => {
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        const query = e.target.value.toLowerCase();
+                        if (query.length > 2) {
+                            // Implement search functionality
+                            console.log('Searching for:', query);
+                        }
+                    });
+
+                    searchInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const query = e.target.value;
+                            if (query.trim()) {
+                                // For now, redirect to reports with search
+                                window.location.href = `{{ url_for('reports') }}?search=${encodeURIComponent(query)}`;
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Mobile navigation improvements
+        function setupMobileNavigation() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            
+            if (navbarToggler && navbarCollapse) {
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!navbarToggler.contains(e.target) && !navbarCollapse.contains(e.target)) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse && navbarCollapse.classList.contains('show')) {
+                            bsCollapse.hide();
+                        }
+                    }
+                });
+
+                // Close mobile menu when clicking on nav links
+                navbarCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)').forEach(link => {
+                    link.addEventListener('click', () => {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse && navbarCollapse.classList.contains('show')) {
+                            bsCollapse.hide();
+                        }
+                    });
+                });
+            }
+        }
+
+        // Enhanced keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + N for new entry
-            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                e.preventDefault();
-                window.location.href = "{{ url_for('add_order') }}";
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        window.location.href = "{{ url_for('add_order') }}";
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        window.location.href = "{{ url_for('reports') }}";
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        window.location.href = "{{ url_for('index') }}";
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                    case '/':
+                        e.preventDefault();
+                        const searchInput = document.getElementById('desktopSearch') || document.getElementById('mobileSearch');
+                        if (searchInput) {
+                            searchInput.focus();
+                        }
+                        break;
+                }
             }
+        });
+
+        // Initialize navigation enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            setupSearch();
+            setupMobileNavigation();
             
-            // Ctrl/Cmd + R for reports
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                e.preventDefault();
-                window.location.href = "{{ url_for('reports') }}";
-            }
-            
-            // Ctrl/Cmd + D for dashboard
-            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-                e.preventDefault();
-                window.location.href = "{{ url_for('index') }}";
-            }
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
 
         // Auto-refresh functionality

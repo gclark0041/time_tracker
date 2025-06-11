@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('reports') }}">
+        <i class="fas fa-chart-line me-1"></i> Reports
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">Analytics</li>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-12 mb-4">

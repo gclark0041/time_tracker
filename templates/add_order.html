@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('index') }}">
+        <i class="fas fa-clock me-1"></i> Time Tracking
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">New Entry</li>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-lg-8 mx-auto">
