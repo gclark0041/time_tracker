@@ -1024,6 +1024,728 @@
                 margin: 0 10px;
             }
         }
+
+        /* Enhanced Dashboard Cards with Mini-Charts */
+        .dashboard-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .card-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .trend-indicator {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .trend-down {
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+
+        .mini-chart {
+            height: 40px;
+            margin-top: 1rem;
+        }
+
+        /* Progress Indicators */
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        .progress-ring__circle {
+            stroke: var(--primary-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .progress-bar-modern {
+            height: 8px;
+            background-color: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+
+        @keyframes progress-bar-stripes {
+            0% { background-position-x: 1rem; }
+        }
+
+        /* Color-coded Categories */
+        .category-service_order { --category-color: #2563eb; }
+        .category-break { --category-color: #06b6d4; }
+        .category-meeting { --category-color: #f59e0b; }
+        .category-training { --category-color: #10b981; }
+        .category-shop_time { --category-color: #6b7280; }
+        .category-vacation { --category-color: #8b5cf6; }
+        .category-personal { --category-color: #ef4444; }
+        .category-holiday { --category-color: #f97316; }
+
+        .category-badge {
+            background-color: var(--category-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--category-color);
+            display: inline-block;
+        }
+
+        /* Floating Action Button */
+        .fab-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1040;
+        }
+
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .fab-main.open {
+            transform: rotate(45deg);
+        }
+
+        .fab-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .fab-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .fab-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: fabItemSlide 0.3s ease forwards;
+        }
+
+        .fab-item:nth-child(1) { animation-delay: 0.1s; }
+        .fab-item:nth-child(2) { animation-delay: 0.15s; }
+        .fab-item:nth-child(3) { animation-delay: 0.2s; }
+        .fab-item:nth-child(4) { animation-delay: 0.25s; }
+
+        @keyframes fabItemSlide {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .fab-item-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }
+
+        .fab-item-label {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            transition: left 0.3s ease;
+            z-index: 1050;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav-item:hover {
+            background-color: var(--bg-secondary);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav-item.active {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-nav-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .status-active {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-paused {
+            background-color: #f59e0b;
+        }
+
+        .status-completed {
+            background-color: #6b7280;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Enhanced Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--bg-tertiary);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .skeleton-loader {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-description {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Quick Actions Menu */
+        .quick-actions-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .quick-actions-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .quick-action-item:last-child {
+            border-bottom: none;
+        }
+
+        .quick-action-item:hover {
+            background-color: var(--bg-secondary);
+            color: var(--primary-color);
+        }
+
+        .quick-action-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb-modern {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb-modern .breadcrumb-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-modern .breadcrumb-item + .breadcrumb-item::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' class='bi bi-chevron-right' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            margin: 0 0.5rem;
+        }
+
+        /* Calendar Heat Map Styles */
+        .calendar-heatmap {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .heatmap-month {
+            display: inline-block;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .heatmap-month-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .heatmap-week {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+
+        .heatmap-day {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            background-color: var(--bg-tertiary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .heatmap-day:hover {
+            transform: scale(1.2);
+            border-radius: 3px;
+        }
+
+        .heatmap-day[data-level="1"] { background-color: #c6f6d5; }
+        .heatmap-day[data-level="2"] { background-color: #9ae6b4; }
+        .heatmap-day[data-level="3"] { background-color: #68d391; }
+        .heatmap-day[data-level="4"] { background-color: #38a169; }
+
+        [data-bs-theme="dark"] .heatmap-day[data-level="1"] { background-color: #22543d; }
+        [data-bs-theme="dark"] .heatmap-day[data-level="2"] { background-color: #2f855a; }
+        [data-bs-theme="dark"] .heatmap-day[data-level="3"] { background-color: #38a169; }
+        [data-bs-theme="dark"] .heatmap-day[data-level="4"] { background-color: #48bb78; }
+
+        /* Enhanced Form Controls */
+        .form-control-modern {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-modern:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Responsive Design Enhancements */
+        @media (max-width: 768px) {
+            .dashboard-card {
+                padding: 1rem;
+            }
+
+            .card-value {
+                font-size: 1.5rem;
+            }
+
+            .fab-container {
+                bottom: 1rem;
+                right: 1rem;
+            }
+
+            .fab-main {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+
+            .sidebar {
+                width: 280px;
+            }
+
+            .calendar-heatmap {
+                padding: 1rem;
+                overflow-x: auto;
+            }
+
+            .heatmap-month {
+                margin-right: 0.5rem;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced Button Styles */
+        .btn-enhanced {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-enhanced:hover::before {
+            left: 100%;
+        }
+
+        /* Toast Notifications Enhancement */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+
+        .toast-modern {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 0.5rem;
+            min-width: 300px;
+        }
+
+        .toast-success { border-left: 4px solid #10b981; }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-warning { border-left: 4px solid #f59e0b; }
+        .toast-info { border-left: 4px solid #06b6d4; }
+
+        /* Additional Dashboard Components */
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .order-row {
+            transition: all 0.2s ease;
+        }
+
+        .order-row:hover {
+            background-color: var(--bg-secondary);
+            transform: translateX(2px);
+        }
+
+        .table-light th {
+            background-color: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -2060,9 +2782,297 @@ Keyboard Shortcuts:
             });
         });
 
+        // Enhanced Dashboard Features
+        function initializeDashboard() {
+            loadDashboardStats();
+            setupProgressIndicators();
+            createCalendarHeatmap();
+            initializeMiniCharts();
+        }
+
+        function loadDashboardStats() {
+            // Fetch and update dashboard statistics
+            fetch('/api/dashboard-stats')
+                .then(response => response.json())
+                .then(data => {
+                    updateDashboardCards(data);
+                })
+                .catch(error => {
+                    console.log('Dashboard stats not available yet');
+                });
+        }
+
+        function updateDashboardCards(data) {
+            // Update Today Hours
+            const todayElement = document.getElementById('todayHours');
+            if (todayElement && data.todayHours !== undefined) {
+                animateValue(todayElement, 0, data.todayHours, 1000, 'h');
+            }
+
+            // Update Week Hours
+            const weekElement = document.getElementById('weekHours');
+            if (weekElement && data.weekHours !== undefined) {
+                animateValue(weekElement, 0, data.weekHours, 1000, 'h');
+            }
+
+            // Update trend indicators
+            updateTrendIndicators(data);
+        }
+
+        function animateValue(element, start, end, duration, suffix = '') {
+            const startTime = performance.now();
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const value = start + (end - start) * progress;
+                element.textContent = value.toFixed(1) + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            requestAnimationFrame(animate);
+        }
+
+        function updateTrendIndicators(data) {
+            if (data.trends) {
+                Object.keys(data.trends).forEach(key => {
+                    const indicator = document.querySelector(`[data-trend="${key}"]`);
+                    if (indicator) {
+                        const trend = data.trends[key];
+                        indicator.className = `trend-indicator ${trend.direction === 'up' ? 'trend-up' : 'trend-down'}`;
+                        indicator.innerHTML = `
+                            <i class="fas fa-arrow-${trend.direction}"></i>
+                            ${trend.percentage}%
+                        `;
+                    }
+                });
+            }
+        }
+
+        function setupProgressIndicators() {
+            const progressRings = document.querySelectorAll('.progress-ring__circle');
+            progressRings.forEach(ring => {
+                const radius = ring.r.baseVal.value;
+                const circumference = radius * 2 * Math.PI;
+                const progress = ring.dataset.progress || 0;
+                const offset = circumference - (progress / 100) * circumference;
+                
+                ring.style.strokeDasharray = `${circumference} ${circumference}`;
+                ring.style.strokeDashoffset = circumference;
+                
+                setTimeout(() => {
+                    ring.style.strokeDashoffset = offset;
+                }, 500);
+            });
+        }
+
+        function createCalendarHeatmap() {
+            const container = document.getElementById('calendar-heatmap');
+            if (!container) return;
+
+            // Generate the last 12 months of data
+            const months = [];
+            const today = new Date();
+            
+            for (let i = 11; i >= 0; i--) {
+                const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                months.push(month);
+            }
+
+            container.innerHTML = '';
+            
+            months.forEach(month => {
+                const monthElement = createMonthHeatmap(month);
+                container.appendChild(monthElement);
+            });
+        }
+
+        function createMonthHeatmap(month) {
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'heatmap-month';
+            
+            const label = document.createElement('div');
+            label.className = 'heatmap-month-label';
+            label.textContent = month.toLocaleDateString('en-US', { month: 'short' });
+            monthDiv.appendChild(label);
+            
+            const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+            const firstDay = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+            
+            let currentWeek = document.createElement('div');
+            currentWeek.className = 'heatmap-week';
+            
+            // Add empty days for the first week
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'heatmap-day';
+                currentWeek.appendChild(emptyDay);
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                if (currentWeek.children.length === 7) {
+                    monthDiv.appendChild(currentWeek);
+                    currentWeek = document.createElement('div');
+                    currentWeek.className = 'heatmap-week';
+                }
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'heatmap-day';
+                
+                // Simulate data - replace with actual data
+                const level = Math.floor(Math.random() * 5);
+                if (level > 0) {
+                    dayElement.setAttribute('data-level', level);
+                }
+                
+                const date = new Date(month.getFullYear(), month.getMonth(), day);
+                dayElement.title = `${date.toLocaleDateString()} - ${level * 2}h`;
+                
+                currentWeek.appendChild(dayElement);
+            }
+            
+            if (currentWeek.children.length > 0) {
+                monthDiv.appendChild(currentWeek);
+            }
+            
+            return monthDiv;
+        }
+
+        function initializeMiniCharts() {
+            const chartContainers = document.querySelectorAll('.mini-chart');
+            chartContainers.forEach(container => {
+                createMiniChart(container);
+            });
+        }
+
+        function createMiniChart(container) {
+            const canvas = document.createElement('canvas');
+            canvas.width = container.offsetWidth;
+            canvas.height = 40;
+            container.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Generate sample data
+            const data = Array.from({length: 7}, () => Math.random() * 100);
+            const max = Math.max(...data);
+            
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            data.forEach((value, index) => {
+                const x = (index / (data.length - 1)) * canvas.width;
+                const y = canvas.height - (value / max) * canvas.height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+        }
+
+        // Sidebar Navigation
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+            }
+            if (overlay) {
+                overlay.classList.toggle('show');
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (sidebar) {
+                sidebar.classList.remove('open');
+            }
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Enhanced Loading States
+        function showLoadingEnhanced(message = 'Loading...') {
+            let overlay = document.getElementById('loading-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loading-overlay';
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `
+                    <div class="text-center">
+                        <div class="loading-spinner"></div>
+                        <div class="mt-3" id="loading-message">${message}</div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            document.getElementById('loading-message').textContent = message;
+            overlay.classList.add('show');
+        }
+
+        function hideLoadingEnhanced() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Enhanced Toast Notifications
+        function showToastEnhanced(message, type = 'info', duration = 5000) {
+            const toastContainer = getOrCreateToastContainer();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast-modern toast-${type} fade-in`;
+            
+            toast.innerHTML = `
+                <div class="d-flex align-items-center p-3">
+                    <i class="fas fa-${getToastIcon(type)} me-2"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto remove
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, duration);
+        }
+
+        function getOrCreateToastContainer() {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'toast-container';
+                document.body.appendChild(container);
+            }
+            return container;
+        }
+
         // Make functions globally available
         window.showToast = showToast;
+        window.showToastEnhanced = showToastEnhanced;
+        window.showLoadingEnhanced = showLoadingEnhanced;
+        window.hideLoadingEnhanced = hideLoadingEnhanced;
         window.toggleFAB = toggleFAB;
+        window.toggleSidebar = toggleSidebar;
+        window.closeSidebar = closeSidebar;
         window.startQuickTimer = startQuickTimer;
         window.openCamera = openCamera;
         window.startVoiceInput = startVoiceInput;
@@ -2070,6 +3080,7 @@ Keyboard Shortcuts:
         window.closePatternNotification = closePatternNotification;
         window.acceptPatternSuggestion = acceptPatternSuggestion;
         window.dismissPatternSuggestion = dismissPatternSuggestion;
+        window.initializeDashboard = initializeDashboard;
 
         // Auto-refresh functionality
         function enableAutoRefresh() {

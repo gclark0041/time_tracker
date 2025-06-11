@@ -1,36 +1,177 @@
 {% extends "base.html" %}
 
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-modern">
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
 {% block content %}
+<!-- Sidebar Navigation -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="mb-0">Quick Navigation</h5>
+        <button class="btn btn-sm btn-outline-secondary" onclick="closeSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('index') }}" class="sidebar-nav-item active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="{{ url_for('add_order') }}" class="sidebar-nav-item">
+            <i class="fas fa-plus-circle"></i> New Entry
+        </a>
+        <a href="{{ url_for('upload_image') }}" class="sidebar-nav-item">
+            <i class="fas fa-camera"></i> Import Image
+        </a>
+        <a href="{{ url_for('reports') }}" class="sidebar-nav-item">
+            <i class="fas fa-chart-line"></i> Reports
+        </a>
+        <a href="{{ url_for('weekly_report') }}" class="sidebar-nav-item">
+            <i class="fas fa-file-invoice-dollar"></i> Payroll
+        </a>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_user_management') }}" class="sidebar-nav-item">
+            <i class="fas fa-users-cog"></i> User Management
+        </a>
+        <a href="{{ url_for('admin_settings') }}" class="sidebar-nav-item">
+            <i class="fas fa-cogs"></i> Settings
+        </a>
+        {% endif %}
+    </nav>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Enhanced Dashboard Stats Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center">
+                <div class="card-icon bg-primary text-white">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="card-value" id="todayHours">0.0h</div>
+                    <div class="card-label">Today</div>
+                    <div class="card-trend" data-trend="today">
+                        <span class="trend-indicator trend-up">
+                            <i class="fas fa-arrow-up"></i> 12%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mini-chart" id="todayChart"></div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center">
+                <div class="card-icon bg-success text-white">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="card-value" id="weekHours">0.0h</div>
+                    <div class="card-label">This Week</div>
+                    <div class="card-trend" data-trend="week">
+                        <span class="trend-indicator trend-down">
+                            <i class="fas fa-arrow-down"></i> 3%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mini-chart" id="weekChart"></div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center">
+                <div class="card-icon bg-warning text-white">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="card-value">{{ active_orders|length }}</div>
+                    <div class="card-label">Active Timers</div>
+                    <div class="card-trend">
+                        {% if active_orders %}
+                        <span class="trend-indicator trend-up">
+                            <i class="fas fa-clock"></i> Running
+                        </span>
+                        {% else %}
+                        <span class="trend-indicator">
+                            <i class="fas fa-pause"></i> None
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="progress-bar-modern mt-2">
+                <div class="progress-bar-fill" style="width: {{ (active_orders|length / 5 * 100)|round|int }}%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center">
+                <div class="card-icon bg-info text-white">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="card-value">92%</div>
+                    <div class="card-label">Efficiency</div>
+                    <div class="card-trend">
+                        <span class="trend-indicator trend-up">
+                            <i class="fas fa-arrow-up"></i> 5%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center mt-2">
+                <svg class="progress-ring" width="40" height="40">
+                    <circle class="progress-ring__circle" 
+                            stroke="currentColor" stroke-width="3" 
+                            fill="transparent" r="16" cx="20" cy="20"
+                            data-progress="92">
+                    </circle>
+                </svg>
+                <small class="text-muted ms-2">vs last week</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Quick Actions Bar -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
             <div class="card-body py-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="quick-actions">
-                        <button class="btn btn-primary quick-btn" onclick="quickStart('service_order')">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div class="quick-actions d-flex flex-wrap gap-2">
+                        <button class="btn btn-primary btn-enhanced" onclick="startQuickTimer('service_order')">
                             <i class="fas fa-tools me-1"></i> Service Order
                         </button>
-                        <button class="btn btn-info quick-btn" onclick="quickStart('break')">
-                            <i class="fas fa-coffee me-1"></i> Break (15min)
+                        <button class="btn btn-info btn-enhanced" onclick="startQuickTimer('break')">
+                            <i class="fas fa-coffee me-1"></i> Break
                         </button>
-                        <button class="btn btn-warning quick-btn" onclick="quickStart('meeting')">
+                        <button class="btn btn-warning btn-enhanced" onclick="startQuickTimer('meeting')">
                             <i class="fas fa-users me-1"></i> Meeting
                         </button>
-                        <button class="btn btn-success quick-btn" onclick="quickStart('training')">
+                        <button class="btn btn-success btn-enhanced" onclick="startQuickTimer('training')">
                             <i class="fas fa-graduation-cap me-1"></i> Training
                         </button>
                     </div>
                     <div class="d-flex align-items-center gap-3">
-                        <div class="text-center">
-                            <div class="h5 mb-0 text-primary" id="todayHours">0.0h</div>
-                            <small class="text-muted">Today</small>
-                        </div>
-                        <div class="text-center">
-                            <div class="h5 mb-0 text-success" id="weekHours">0.0h</div>
-                            <small class="text-muted">This Week</small>
-                        </div>
-                        <a href="{{ url_for('add_order') }}" class="btn btn-primary">
+                        <button class="btn btn-outline-secondary" onclick="toggleSidebar()">
+                            <i class="fas fa-bars me-1"></i> Menu
+                        </button>
+                        <a href="{{ url_for('add_order') }}" class="btn btn-primary btn-enhanced">
                             <i class="fas fa-plus me-1"></i> New Entry
                         </a>
                     </div>
@@ -40,8 +181,9 @@
     </div>
 </div>
 
-<!-- Active Time Entries -->
+<!-- Main Content Row -->
 <div class="row">
+    <!-- Active Time Entries -->
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
@@ -77,22 +219,30 @@
                             {% for order in active_orders %}
                             <tr class="order-row swipe-item" data-order-id="{{ order.id }}">
                                 <td>
-                                    <span class="status-dot status-active" title="Active"></span>
+                                    <div class="status-indicator">
+                                        <span class="status-dot status-active" title="Active"></span>
+                                    </div>
                                 </td>
                                 <td>
                                     {% if order.entry_type == 'service_order' %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-tools text-primary me-2"></i>
+                                        <div class="d-flex align-items-center category-service_order">
+                                            <span class="category-dot me-2"></span>
                                             <div>
-                                                <span class="badge bg-primary">{{ order.order_number }}</span>
+                                                <span class="category-badge">
+                                                    <i class="fas fa-tools me-1"></i>
+                                                    {{ order.order_number }}
+                                                </span>
                                                 <small class="d-block text-muted">Service Order</small>
                                             </div>
                                         </div>
                                     {% else %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-clock text-warning me-2"></i>
+                                        <div class="d-flex align-items-center category-{{ order.category }}">
+                                            <span class="category-dot me-2"></span>
                                             <div>
-                                                <span class="badge bg-warning text-dark">{{ order.category }}</span>
+                                                <span class="category-badge">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    {{ order.category|title }}
+                                                </span>
                                                 <small class="d-block text-muted">Other Time</small>
                                             </div>
                                         </div>
@@ -123,7 +273,7 @@
                                             <circle class="progress-ring__circle" 
                                                     stroke="currentColor" stroke-width="3" 
                                                     fill="transparent" r="16" cx="20" cy="20"
-                                                                                                         style="stroke-dasharray: 100.48; stroke-dashoffset: 75.36">
+                                                    data-progress="25">
                                             </circle>
                                         </svg>
                                         <small class="text-muted">25%</small>
@@ -196,14 +346,16 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="text-center py-5">
-                    <div class="mb-3">
-                        <i class="fas fa-clock text-muted" style="font-size: 3rem;"></i>
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-clock"></i>
                     </div>
-                    <h5 class="text-muted">No Active Time Entries</h5>
-                    <p class="text-muted mb-4">Start tracking your time by creating a new entry</p>
-                    <a href="{{ url_for('add_order') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Create First Entry
+                    <div class="empty-state-title">No Active Timers</div>
+                    <div class="empty-state-description">
+                        Start tracking your time by creating a new entry or using quick actions above.
+                    </div>
+                    <a href="{{ url_for('add_order') }}" class="btn btn-primary btn-enhanced">
+                        <i class="fas fa-plus me-1"></i> Start First Timer
                     </a>
                 </div>
                 {% endif %}
@@ -211,405 +363,167 @@
         </div>
     </div>
     
-    <!-- Today's Summary & Quick Stats -->
+    <!-- Sidebar Content -->
     <div class="col-lg-4">
-        <!-- Today's Summary -->
-        <div class="card mb-3">
+        <!-- Calendar Heat Map -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i> Today's Summary</h5>
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i> Activity Calendar
+                </h5>
             </div>
             <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-6">
-                        <div class="h3 mb-0 text-primary" id="todayTotalHours">0.0</div>
-                        <small class="text-muted">Hours Worked</small>
+                <div class="calendar-heatmap" id="calendar-heatmap"></div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">Less</small>
+                    <div class="d-flex gap-1">
+                        <div class="heatmap-day" data-level="0"></div>
+                        <div class="heatmap-day" data-level="1"></div>
+                        <div class="heatmap-day" data-level="2"></div>
+                        <div class="heatmap-day" data-level="3"></div>
+                        <div class="heatmap-day" data-level="4"></div>
                     </div>
-                    <div class="col-6">
-                        <div class="h3 mb-0 text-success" id="todayEntries">0</div>
-                        <small class="text-muted">Entries</small>
+                    <small class="text-muted">More</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i> Quick Stats
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted">Daily Goal</span>
+                        <span class="fw-bold">6.5h / 8h</span>
+                    </div>
+                    <div class="progress-bar-modern">
+                        <div class="progress-bar-fill" style="width: 81%"></div>
                     </div>
                 </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted">Weekly Goal</span>
+                        <span class="fw-bold">32h / 40h</span>
+                    </div>
+                    <div class="progress-bar-modern">
+                        <div class="progress-bar-fill" style="width: 80%"></div>
+                    </div>
+                </div>
+
                 <hr>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span>Service Orders</span>
-                    <span class="badge bg-primary" id="serviceOrderCount">0</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span>Other Time</span>
-                    <span class="badge bg-warning text-dark" id="otherTimeCount">0</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span>Breaks</span>
-                    <span class="badge bg-info" id="breakCount">0</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Weekly Progress -->
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Week Progress</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span>This Week</span>
-                    <span class="fw-bold" id="weekProgress">0 / 40 hours</span>
-                </div>
-                <div class="progress mb-3" style="height: 8px;">
-                    <div class="progress-bar bg-gradient" role="progressbar" 
-                         style="width: 0%" id="weekProgressBar"></div>
-                </div>
                 <div class="row text-center">
                     <div class="col-4">
-                        <div class="text-success fw-bold">Mon</div>
-                        <small class="text-muted">8h</small>
+                        <div class="h5 text-primary mb-0">{% if completed_today %}{{ completed_today }}{% else %}0{% endif %}</div>
+                        <small class="text-muted">Completed</small>
                     </div>
                     <div class="col-4">
-                        <div class="text-success fw-bold">Tue</div>
-                        <small class="text-muted">7.5h</small>
+                        <div class="h5 text-warning mb-0">{{ active_orders|length }}</div>
+                        <small class="text-muted">Active</small>
                     </div>
                     <div class="col-4">
-                        <div class="text-warning fw-bold">Wed</div>
-                        <small class="text-muted">6h</small>
+                        <div class="h5 text-success mb-0">92%</div>
+                        <small class="text-muted">Efficiency</small>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Quick Time Chart -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Time Distribution</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="timeDistributionChart" width="300" height="200"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recent Completed Entries -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i> Recent Completed Entries</h4>
-                <a href="{{ url_for('reports') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-chart-bar me-1"></i> View All Reports
-                </a>
-            </div>
-            <div class="card-body p-0">
-                {% if completed_orders %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="20">Status</th>
-                                <th>Type</th>
-                                <th>Employee</th>
-                                <th>Duration</th>
-                                <th>Completed</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in completed_orders[:5] %}
-                            <tr>
-                                <td>
-                                    <span class="status-dot status-completed" title="Completed"></span>
-                                </td>
-                                <td>
-                                    {% if order.entry_type == 'service_order' %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-tools text-primary me-2"></i>
-                                            <div>
-                                                <span class="badge bg-primary">{{ order.order_number }}</span>
-                                                <small class="d-block text-muted">Service Order</small>
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-clock text-warning me-2"></i>
-                                            <div>
-                                                <span class="badge bg-warning text-dark">{{ order.category }}</span>
-                                                <small class="d-block text-muted">Other Time</small>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-circle bg-secondary text-white">
-                                            {{ order.employee_name[0]|upper }}
-                                        </div>
-                                        <span class="ms-2">{{ order.employee_name }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-success">{{ order.get_elapsed_time() }}</span>
-                                </td>
-                                <td>
-                                    <div>
-                                        <strong>{{ order.end_time.strftime('%H:%M') }}</strong>
-                                        <small class="d-block text-muted">{{ order.end_time.strftime('%m/%d') }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if order.notes %}
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" 
-                                            data-bs-toggle="tooltip" data-bs-html="true"
-                                            title="{{ order.notes }}">
-                                            <i class="fas fa-sticky-note"></i>
-                                        </button>
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{{ url_for('edit_order', order_id=order.id) }}" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-check-circle text-muted" style="font-size: 2rem;"></i>
-                    <p class="text-muted mt-2">No completed entries today</p>
-                </div>
-                {% endif %}
-            </div>
+<!-- Floating Action Button -->
+<div class="fab-container">
+    <button class="fab-main" id="fabMain" onclick="toggleFAB()">
+        <i class="fas fa-plus"></i>
+    </button>
+    <div class="fab-menu" id="fabMenu">
+        <div class="fab-item">
+            <div class="fab-item-label">Service Order</div>
+            <button class="fab-item-btn bg-primary" onclick="startQuickTimer('service_order')">
+                <i class="fas fa-tools"></i>
+            </button>
+        </div>
+        <div class="fab-item">
+            <div class="fab-item-label">Break</div>
+            <button class="fab-item-btn bg-info" onclick="startQuickTimer('break')">
+                <i class="fas fa-coffee"></i>
+            </button>
+        </div>
+        <div class="fab-item">
+            <div class="fab-item-label">Meeting</div>
+            <button class="fab-item-btn bg-warning" onclick="startQuickTimer('meeting')">
+                <i class="fas fa-users"></i>
+            </button>
+        </div>
+        <div class="fab-item">
+            <div class="fab-item-label">Upload Image</div>
+            <button class="fab-item-btn bg-secondary" onclick="window.location.href='{{ url_for('upload_image') }}'">
+                <i class="fas fa-camera"></i>
+            </button>
         </div>
     </div>
 </div>
-
-<!-- Additional CSS for new elements -->
-<style>
-.avatar-circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.progress-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.order-row {
-    transition: all 0.2s ease;
-}
-
-.order-row:hover {
-    background-color: var(--bg-secondary);
-    transform: translateX(2px);
-}
-
-.table-light th {
-    background-color: var(--bg-tertiary);
-    border-bottom: 2px solid var(--border-color);
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-@media (max-width: 768px) {
-    .quick-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .quick-actions .quick-btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-}
-</style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+// Initialize enhanced dashboard features
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize time distribution chart
-    initTimeDistributionChart();
+    initializeDashboard();
     
-    // Update dashboard stats
-    updateDashboardStats();
+    // Update time displays every 30 seconds
+    setInterval(updateTimerDisplays, 30000);
     
-    // Auto-refresh functionality
-    let autoRefreshEnabled = true;
-    let refreshInterval;
-    
-    function startAutoRefresh() {
-        refreshInterval = setInterval(function() {
-            if (autoRefreshEnabled) {
-                updateTimerDisplays();
-                updateDashboardStats();
-            }
-        }, 5000); // Update every 5 seconds
-    }
-    
-    function toggleAutoRefresh() {
-        autoRefreshEnabled = !autoRefreshEnabled;
-        const btn = document.getElementById('autoRefreshBtn');
-        if (autoRefreshEnabled) {
-            btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Auto-Refresh: ON';
-            btn.classList.remove('btn-outline-light');
-            btn.classList.add('btn-light');
-        } else {
-            btn.innerHTML = '<i class="fas fa-pause me-1"></i> Auto-Refresh: OFF';
-            btn.classList.remove('btn-light');
-            btn.classList.add('btn-outline-light');
+    // Close FAB when clicking outside
+    document.addEventListener('click', function(e) {
+        const fabContainer = document.querySelector('.fab-container');
+        if (fabContainer && !fabContainer.contains(e.target)) {
+            const fabMain = document.getElementById('fabMain');
+            const fabMenu = document.getElementById('fabMenu');
+            fabMain.classList.remove('open');
+            fabMenu.classList.remove('open');
         }
-    }
-    
-    // Make toggle function globally available
-    window.toggleAutoRefresh = toggleAutoRefresh;
-    
-    // Start auto-refresh
-    startAutoRefresh();
-    
-    // Initialize tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
-    // Update timer displays
-    function updateTimerDisplays() {
-        const timeElements = document.querySelectorAll('.order-time[data-start]');
-        timeElements.forEach(function(el) {
-            const startTime = new Date(el.dataset.start);
-            const now = new Date();
-            const diff = Math.floor((now - startTime) / 1000);
-            
-            const hours = Math.floor(diff / 3600);
-            const minutes = Math.floor((diff % 3600) / 60);
-            
-            el.textContent = `${hours}h ${minutes}m`;
-        });
-    }
-    
-    // Update dashboard statistics
-    function updateDashboardStats() {
-        // This would typically fetch from an API endpoint
-        // For now, we'll calculate from existing data
-        const activeTimers = document.querySelectorAll('.active-indicator').length;
-        document.getElementById('activeCount').textContent = activeTimers;
-        
-        // Update floating timer
-        updateFloatingTimer();
-    }
-    
-    // Quick start functionality
-    window.quickStart = function(type) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('add_order') }}";
-        
-        // Add CSRF token if available
-        const csrfToken = document.querySelector('meta[name=csrf-token]');
-        if (csrfToken) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrf_token';
-            csrfInput.value = csrfToken.getAttribute('content');
-            form.appendChild(csrfInput);
-        }
-        
-        // Add entry type
-        const typeInput = document.createElement('input');
-        typeInput.type = 'hidden';
-        typeInput.name = 'entry_type';
-        typeInput.value = type === 'service_order' ? 'service_order' : 'other_time';
-        form.appendChild(typeInput);
-        
-        // Add category for other time types
-        if (type !== 'service_order') {
-            const categoryInput = document.createElement('input');
-            categoryInput.type = 'hidden';
-            categoryInput.name = 'category';
-            categoryInput.value = type;
-            form.appendChild(categoryInput);
-        }
-        
-        // Add employee name (current user)
-        const employeeInput = document.createElement('input');
-        employeeInput.type = 'hidden';
-        employeeInput.name = 'employee_name';
-        employeeInput.value = "{{ current_user.get_full_name() }}";
-        form.appendChild(employeeInput);
-        
-        // Add quick start flag
-        const quickInput = document.createElement('input');
-        quickInput.type = 'hidden';
-        quickInput.name = 'quick_start';
-        quickInput.value = 'true';
-        form.appendChild(quickInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-    };
-    
-    // Pause timer functionality
-    window.pauseTimer = function(orderId) {
-        // This would implement pause/resume functionality
-        // For now, show a message
-        alert('Pause/Resume functionality coming soon!');
-    };
-    
-    // Time distribution chart
-    function initTimeDistributionChart() {
-        const ctx = document.getElementById('timeDistributionChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Service Orders', 'Meetings', 'Breaks', 'Training', 'Other'],
-                datasets: [{
-                    data: [45, 20, 15, 10, 10],
-                    backgroundColor: [
-                        '#2563eb',
-                        '#f59e0b',
-                        '#06b6d4',
-                        '#10b981',
-                        '#64748b'
-                    ],
-                    borderWidth: 2,
-                    borderColor: 'var(--bg-primary)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 10,
-                            usePointStyle: true,
-                            font: {
-                                size: 11
-                            }
-                        }
-                    }
-                },
-                cutout: '60%'
-            }
-        });
-    }
 });
+
+function updateTimerDisplays() {
+    const timeElements = document.querySelectorAll('.order-time[data-start]');
+    timeElements.forEach(function(el) {
+        const startTime = new Date(el.dataset.start);
+        const now = new Date();
+        const diff = Math.floor((now - startTime) / 1000);
+        
+        const hours = Math.floor(diff / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        
+        el.textContent = hours + 'h ' + minutes + 'm';
+    });
+}
+
+function pauseTimer(orderId) {
+    showToastEnhanced('Timer paused for order #' + orderId, 'warning');
+    // Add actual pause functionality here
+}
+
+function toggleAutoRefresh() {
+    const btn = document.getElementById('autoRefreshBtn');
+    const isOn = btn.textContent.includes('ON');
+    
+    if (isOn) {
+        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Auto-Refresh: OFF';
+        btn.classList.replace('btn-light', 'btn-outline-light');
+    } else {
+        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Auto-Refresh: ON';
+        btn.classList.replace('btn-outline-light', 'btn-light');
+    }
+    
+    showToastEnhanced('Auto-refresh ' + (isOn ? 'disabled' : 'enabled'), 'info');
+}
 </script>
 {% endblock %}

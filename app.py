@@ -1651,6 +1651,199 @@ def admin_get_user():
     
     return jsonify({'html': html})
 
+# Enhanced API Endpoints for Dashboard Features
+
+@app.route('/api/dashboard-stats', methods=['GET'])
+@login_required
+def api_dashboard_stats():
+    """Get enhanced dashboard statistics"""
+    today = date.today()
+    week_start = today - timedelta(days=today.weekday())
+    
+    # Get today's hours for current user
+    today_orders = Order.query.filter(
+        Order.start_time >= datetime.combine(today, datetime.min.time()),
+        Order.start_time < datetime.combine(today + timedelta(days=1), datetime.min.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    today_hours = 0
+    for order in today_orders:
+        if order.end_time:
+            duration = order.end_time - order.start_time
+            today_hours += duration.total_seconds() / 3600
+    
+    # Get week's hours for current user
+    week_orders = Order.query.filter(
+        Order.start_time >= datetime.combine(week_start, datetime.min.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    week_hours = 0
+    for order in week_orders:
+        if order.end_time:
+            duration = order.end_time - order.start_time
+            week_hours += duration.total_seconds() / 3600
+    
+    # Calculate trends (compare with previous periods)
+    yesterday_orders = Order.query.filter(
+        Order.start_time >= datetime.combine(today - timedelta(days=1), datetime.min.time()),
+        Order.start_time < datetime.combine(today, datetime.min.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    yesterday_hours = 0
+    for order in yesterday_orders:
+        if order.end_time:
+            duration = order.end_time - order.start_time
+            yesterday_hours += duration.total_seconds() / 3600
+    
+    prev_week_start = week_start - timedelta(days=7)
+    prev_week_orders = Order.query.filter(
+        Order.start_time >= datetime.combine(prev_week_start, datetime.min.time()),
+        Order.start_time < datetime.combine(week_start, datetime.min.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    prev_week_hours = 0
+    for order in prev_week_orders:
+        if order.end_time:
+            duration = order.end_time - order.start_time
+            prev_week_hours += duration.total_seconds() / 3600
+    
+    # Calculate trend percentages
+    today_trend = 0
+    if yesterday_hours > 0:
+        today_trend = round(((today_hours - yesterday_hours) / yesterday_hours) * 100, 1)
+    
+    week_trend = 0
+    if prev_week_hours > 0:
+        week_trend = round(((week_hours - prev_week_hours) / prev_week_hours) * 100, 1)
+    
+    return jsonify({
+        'todayHours': round(today_hours, 1),
+        'weekHours': round(week_hours, 1),
+        'trends': {
+            'today': {
+                'percentage': abs(today_trend),
+                'direction': 'up' if today_trend >= 0 else 'down'
+            },
+            'week': {
+                'percentage': abs(week_trend),
+                'direction': 'up' if week_trend >= 0 else 'down'
+            }
+        }
+    })
+
+@app.route('/api/calendar-heatmap', methods=['GET'])
+@login_required
+def api_calendar_heatmap():
+    """Get calendar heatmap data for activity visualization"""
+    end_date = date.today()
+    start_date = end_date - timedelta(days=365)  # Last year
+    
+    # Get all completed orders in the date range for current user
+    orders = Order.query.filter(
+        Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+        Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    # Group by date and calculate hours
+    daily_hours = defaultdict(float)
+    for order in orders:
+        if order.end_time:
+            order_date = order.start_time.date()
+            duration = order.end_time - order.start_time
+            daily_hours[order_date] += duration.total_seconds() / 3600
+    
+    # Convert to format expected by frontend
+    heatmap_data = {}
+    current_date = start_date
+    while current_date <= end_date:
+        hours = daily_hours.get(current_date, 0)
+        # Convert hours to levels (0-4)
+        if hours == 0:
+            level = 0
+        elif hours < 2:
+            level = 1
+        elif hours < 4:
+            level = 2
+        elif hours < 6:
+            level = 3
+        else:
+            level = 4
+            
+        heatmap_data[current_date.isoformat()] = {
+            'hours': round(hours, 1),
+            'level': level
+        }
+        current_date += timedelta(days=1)
+    
+    return jsonify(heatmap_data)
+
+@app.route('/api/time-trends', methods=['GET'])
+@login_required
+def api_time_trends():
+    """Get time trends for charts and analytics"""
+    days = int(request.args.get('days', 30))
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days)
+    
+    # Get orders in date range for current user
+    orders = Order.query.filter(
+        Order.start_time >= datetime.combine(start_date, datetime.min.time()),
+        Order.start_time <= datetime.combine(end_date, datetime.max.time()),
+        Order.end_time.isnot(None),
+        Order.employee_name == current_user.get_full_name()
+    ).all()
+    
+    # Group by date and category
+    daily_data = defaultdict(lambda: defaultdict(float))
+    
+    for order in orders:
+        if order.end_time:
+            order_date = order.start_time.date()
+            category = order.entry_type if order.entry_type == 'service_order' else order.category
+            duration = order.end_time - order.start_time
+            hours = duration.total_seconds() / 3600
+            daily_data[order_date][category] += hours
+    
+    # Convert to chart format
+    chart_data = []
+    current_date = start_date
+    while current_date <= end_date:
+        day_data = {
+            'date': current_date.isoformat(),
+            'total': sum(daily_data[current_date].values())
+        }
+        
+        # Add category breakdowns
+        for category, hours in daily_data[current_date].items():
+            day_data[category] = round(hours, 1)
+            
+        chart_data.append(day_data)
+        current_date += timedelta(days=1)
+    
+    return jsonify(chart_data)
+
+# Add method to Order model for decimal hours
+def get_elapsed_time_decimal(self):
+    """Get elapsed time as decimal hours"""
+    if not self.end_time:
+        duration = datetime.now() - self.start_time
+    else:
+        duration = self.end_time - self.start_time
+    return duration.total_seconds() / 3600
+
+# Add the method to the Order class
+Order.get_elapsed_time_decimal = get_elapsed_time_decimal
+
 # Initialize database
 with app.app_context():
     db.create_all()
