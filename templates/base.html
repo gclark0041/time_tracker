@@ -963,6 +963,7 @@
         .quick-actions {
             flex: 1;
             min-width: 0;
+            justify-content: center;
         }
 
         /* Alert styling */
@@ -1005,8 +1006,13 @@
                 min-width: 120px;
             }
             
-            .quick-actions-container > div:last-child {
+            .quick-actions-container > div:first-child {
                 order: 1;
+                justify-content: center;
+            }
+            
+            .quick-actions-container > div:last-child {
+                order: 3;
                 justify-content: center;
             }
         }
@@ -1166,6 +1172,12 @@
             
             // Update timers every second
             setInterval(updateFloatingTimer, 1000);
+            
+            // Initialize dashboard if on dashboard page
+            if (window.location.pathname === "{{ url_for('index') }}" || window.location.pathname === "/") {
+                console.log('Initializing dashboard...');
+                initializeDashboard();
+            }
         });
 
         // Floating timer functionality
@@ -1897,12 +1909,20 @@ Keyboard Shortcuts:
         function loadDashboardStats() {
             // Fetch and update dashboard statistics
             fetch('/api/dashboard-stats')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Dashboard stats loaded:', data);
                     updateDashboardCards(data);
                 })
                 .catch(error => {
-                    console.log('Dashboard stats not available yet');
+                    console.error('Error loading dashboard stats:', error);
+                    // Try to get data from orders directly as fallback
+                    calculateStatsFromDOM();
                 });
         }
 
@@ -1921,6 +1941,65 @@ Keyboard Shortcuts:
 
             // Update trend indicators
             updateTrendIndicators(data);
+        }
+
+        function calculateStatsFromDOM() {
+            // Fallback: Calculate stats from active orders displayed on page
+            console.log('Calculating stats from DOM as fallback');
+            
+            const activeOrders = document.querySelectorAll('[data-start]');
+            let todayHours = 0;
+            let weekHours = 0;
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+            
+            activeOrders.forEach(orderEl => {
+                const startTimeStr = orderEl.dataset.start;
+                if (startTimeStr) {
+                    const startTime = new Date(startTimeStr);
+                    const orderDate = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
+                    
+                    // Calculate hours for this order
+                    const endTimeStr = orderEl.dataset.end;
+                    let hours = 0;
+                    
+                    if (endTimeStr) {
+                        // Completed order
+                        const endTime = new Date(endTimeStr);
+                        hours = (endTime - startTime) / (1000 * 60 * 60);
+                    } else {
+                        // Active order
+                        hours = (now - startTime) / (1000 * 60 * 60);
+                    }
+                    
+                    // Add to today if order is today
+                    if (orderDate.getTime() === today.getTime()) {
+                        todayHours += hours;
+                    }
+                    
+                    // Add to week if order is this week
+                    if (orderDate >= weekStart) {
+                        weekHours += hours;
+                    }
+                }
+            });
+            
+            // Update the dashboard cards
+            const todayElement = document.getElementById('todayHours');
+            const weekElement = document.getElementById('weekHours');
+            
+            if (todayElement) {
+                animateValue(todayElement, 0, todayHours, 1000, 'h');
+            }
+            
+            if (weekElement) {
+                animateValue(weekElement, 0, weekHours, 1000, 'h');
+            }
+            
+            console.log(`Calculated: Today: ${todayHours.toFixed(1)}h, Week: ${weekHours.toFixed(1)}h`);
         }
 
         function animateValue(element, start, end, duration, suffix = '') {
